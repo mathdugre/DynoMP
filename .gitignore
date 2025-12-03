@@ -1,0 +1,7 @@
+# OSX
+.DS_Store
+
+# Experiments
+output
+log*
+note.md
