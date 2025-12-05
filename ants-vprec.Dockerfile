@@ -1,5 +1,4 @@
-
-FROM verificarlo/verificarlo as builder
+FROM verificarlo/verificarlo AS builder
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
@@ -49,8 +48,8 @@ RUN : \
     -DModule_AdaptiveDenoising=ON \
     -DCMAKE_C_COMPILER=verificarlo-c \
     -DCMAKE_CXX_COMPILER=verificarlo-c++ \
-    -DCMAKE_C_FLAGS="-fsanitize=address -g --verbose --exclude-file=/tmp/vprec-exclude.txt" \
-    -DCMAKE_CXX_FLAGS="-fsanitize=address -g --verbose --exclude-file=/tmp/vprec-exclude.txt" \
+    -DCMAKE_C_FLAGS="--verbose --exclude-file=/tmp/vprec-exclude.txt" \
+    -DCMAKE_CXX_FLAGS="--verbose --exclude-file=/tmp/vprec-exclude.txt" \
     -DITK_C_OPTIMIZATION_FLAGS="-march=x86-64" \ 
     -DITK_CXX_OPTIMIZATION_FLAGS="-march=x86-64" \
     /tmp/itk/source \
@@ -88,8 +87,8 @@ RUN : \
     -DCMAKE_INSTALL_PREFIX=/opt/ants \
     -DCMAKE_C_COMPILER=verificarlo-c \
     -DCMAKE_CXX_COMPILER=verificarlo-c++ \
-    -DCMAKE_C_FLAGS="-fsanitize=address -g --verbose --exclude-file=/tmp/vprec-exclude.txt" \
-    -DCMAKE_CXX_FLAGS="-fsanitize=address -g --verbose --exclude-file=/tmp/vprec-exclude.txt" \
+    -DCMAKE_C_FLAGS="--verbose --exclude-file=/tmp/vprec-exclude.txt" \
+    -DCMAKE_CXX_FLAGS="--verbose --exclude-file=/tmp/vprec-exclude.txt" \
     -DANTS_C_OPTIMIZATION_FLAGS="-march=x86-64" \
     -DANTS_CXX_OPTIMIZATION_FLAGS="-march=x86-64" \
     -DITK_DIR=/tmp/itk/build \
@@ -137,7 +136,7 @@ RUN : \
     vim \
     && apt-get clean \
     && :
-        # && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+# && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
 
 ENV VFC_BACKENDS="libinterflop_ieee.so"
 WORKDIR /data

@@ -4,8 +4,12 @@ mkdir -p ${OUTPUT_DIR}
 FIXED_IMG=$PWD/data/template.nii.gz
 INPUT_IMG=$PWD/data/sub-s007.nii.gz
 
+export VFC_BACKENDS="libinterflop_ieee.so"
+
+export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
+
 # Registration
-antsRegistration \
+gdb --args antsRegistration \
     --verbose 1 \
     --dimensionality 3 \
     --collapse-output-transforms 1 \
@@ -24,8 +28,8 @@ antsRegistration \
     --metric MI[${FIXED_IMG},${INPUT_IMG},1,32,Regular,0.25] \
     --convergence [1000x500x250,1e-6,10] \
     --shrink-factors 8x4x2 \
-    --smoothing-sigmas 3x2x1vox \
-    > log-debug.txt 2>&1
+    --smoothing-sigmas 3x2x1vox
+    # > log-debug.txt 2>&1
     # --transform SyN[ 0.1,3,0 ] \
     # --metric CC[${FIXED_IMG},${INPUT_IMG},1,4] \
     # --convergence [100x70x50x20,1e-6,10] \
