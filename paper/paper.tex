@@ -19,6 +19,7 @@
 %\urlstyle{rm}
 
 \usepackage{subcaption}
+\usepackage{cite}
 % TODO Remove later
 \usepackage[export]{adjustbox} % Add this to your preamble
 \usepackage{color,soul}
@@ -60,7 +61,7 @@ ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-Gradient-based optimization, common in both classical image registration (e.g., ANTs) and deep learning (DL) models for medical image computing, is computationally and memory intensive, typically relying on float64 (CPU) or float32 (GPU) precision. Mixed precision combines high- and low-precision floating-point arithmetic to accelerate computation while preserving accuracy. However, current mixed-precision tuning methods are limited. They either require expensive static analysis, which is often impractical for large or complex codebases, or multiple dynamic execution trials. Popular DL frameworks (e.g., PyTorch) offer Automatic Mixed Precision (AMP), which uses different precision levels for specific operators based on expert knowledge. While suitable for many applications, this approach lacks optimization for specific pipelines or datasets. Furthermore, applying mixed precision to classical methods remains challenging.
+Gradient-based optimization, common in both classical image registration (e.g., ANTs) and deep learning (DL) models for medical image computing, is computationally and memory intensive, typically relying on float64 (CPU) or float32 (GPU) precision. Mixed precision combines high- and low-precision floating-point arithmetic to accelerate computation while preserving accuracy. However, current mixed-precision tuning methods are limited. They either require expensive static analysis, which is often impractical for large or complex codebases, or multiple dynamic execution trials. Popular DL frameworks (e.g., PyTorch) offer Automatic Mixed Precision, which uses different precision levels for specific operators based on expert knowledge. While suitable for many applications, this approach lacks optimization for specific pipelines or datasets. Furthermore, applying mixed precision to classical methods remains challenging.
 
 We introduce DynoMP, a Dynamic Mixed Precision Optimization approach that estimates and adjusts the minimum required bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP on both the classical ANTs registration pipeline (using the CoRR BMB\_1 dataset) and DL model training, including MNIST, VoxelMorph 2D, and VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate that DynoMP can significantly reduce precision compared to default float64 or float32 baselines by adapting to the problem at runtime, all while maintaining the accuracy of the baseline method. This dynamic approach offers a promising pathway for achieving resource-efficient and high-performance medical image computing.
 
@@ -78,75 +79,64 @@ Code is available at \url{https://github.com/anonymized/DynoMP}.
 \MD{Depending on the scope of the paper, we might want to be more broad the MRI pipelines; i.e. MP as a whole.}
 Registration is a fundamental step in magnetic resonance imaging (MRI) analysis, essential for comparing images across different subjects, time points, or contrasts. This process is computationally and memory-intensive; prior research~\cite{Dugre2025-fs} has demonstrated that a few functions constitute the primary bottleneck for both runtime and memory usage. Accelerating registration would enable researchers to analyze larger cohorts and significantly reduce the associated resource costs (e.g., CPU, memory, energy, and time).
 
-Mixed precision computing, which strategically combines high- and low-precision arithmetic, offers a promising avenue for pipeline acceleration while maintaining acceptable accuracy. The deep learning community has successfully adopted mixed precision (AMP), leading to its robust implementation in frameworks like PyTorch~\cite{Paszke2019-vk} and TensorFlow~\cite{Abadi2016-vm}. However, its potential remains largely unexplored in other domains. Current methods for applying mixed precision to general pipelines face significant challenges: static analysis is often impractical for large or complex codebases, and methods requiring multiple pipeline executions are inefficient when processing heterogeneous data and dealing with compute-intensive workflows.
+Mixed precision computing, which strategically combines high- and low-precision arithmetic, offers a promising avenue for pipeline acceleration while maintaining acceptable accuracy. The deep learning (DL) community has successfully adopted mixed precision (AMP), leading to its robust implementation in DL frameworks such as PyTorch~\cite{Paszke2019-vk}. However, its potential remains largely unexplored in other domains. Current methods for applying mixed precision to general pipelines face significant challenges: static analysis is often impractical for large or complex codebases, and dynamic analysis methods---requiring multiple pipeline executions---are inefficient when processing heterogeneous data and dealing with compute-intensive workflows.
 
-Another approach to accelerate pipelines is leveraging GPUs. For instance, FireANTs~\cite{TODO}, a GPU port of the widely used Advanced Normalization Tools (ANTs)~\cite{Avants2020-xx}, achieves comparable registration accuracy while dramatically reducing runtime from several hours to less than a minute. Nevertheless, the high cost and limited availability of GPUs often restrict their widespread use in academic settings.
+Leveraging GPUs is an alternative approach to accelerate piplines. For instance, FireANTs~\cite{Jena2024-ud}, a GPU port of the widely used Advanced Normalization Tools (ANTs)~\cite{Avants2020-xx}, achieves comparable registration accuracy while dramatically reducing runtime from several hours to less than a minute. Nevertheless, the high cost and limited availability of GPUs often restrict their widespread use in academic settings.
 
-\MD{TODO: revise}
-More recently, several deep learning (DL) models~\cite{FastSurfer, SynthMorph, SythSeg, Others?} proved successful at accelerating classical MRI processing steps without compromising accuracy. While these pipeline often benefits from faster runtime, further improved by their GPU support, mixed precision arithmetic is still beneficial for performance improvement. Indeed, most modern DL image processing model leverage the AMP feature from PyTorch or TensorFlow.
+Recent DL models~\cite{Henschel2022-wa, Balakrishnan2019-rx, Hoffmann2022-hu, Billot2023-vp, Zhu2022-uw} proved successful at accelerating classical MRI processing steps without compromising accuracy. While these pipelines often benefit from faster runtime---further improved by their GPU support---mixed precision arithmetic is still beneficial for performance improvement. Indeed, modern DL image processing models often leverage the AMP feature from PyTorch.
 
-In this work, we introduce a novel method to dynamically adjust the precision of gradient-based optimization process based on a theoretical model derived from Hayford et al.~\cite{Hayford2024-kb}. We apply our method to both classical and DL pipelines: ANTs Registration~\cite{Avants2020-xx}, ITK Elastix~\cite{TODO}, and FastSurfer~\cite{TODO}. We assess the impact of this dynamic precision adjustment on the output accuracy when compared to the default pipeline precision.
+In this work, we introduce a novel method to dynamically adjust the precision of gradient-based optimization process based on a theoretical model derived from Hayford et al.~\cite{Hayford2024-kb}. We apply our method to both classical and DL pipelines: ANTs Registration~\cite{Avants2020-xx}, MNIST\cite{Deng2012-hh}\MD{Q: Should I cite the MNIST dataset or the UNET architecture?}, and Voxelmorph~\cite{Balakrishnan2019-rx} 2D and 3D models, \MD{TODO: if times allows: FastSurfer~\cite{Henschel2022-wa}}. We assess the impact of this dynamic precision adjustment on the output accuracy when compared to the default pipeline precision.
 
 \section{Background}
 \label{sec:background}
-
 \subsection{Reduced and Mixed Precision Arithmetic}
-Computational complexity scales quadratically with bit-width~\cite{Wang2019-qe}. While binary64 (FP64) and binary32 (FP32) are the scientific defaults, many pipelines don't need this level of precision. Mixed precision optimizes performance by combining high- and low-precision formats either temporally (across iterations) or spatially (across operations) while maintaining .
+Computational complexity scales quadratically with bit-width~\cite{Wang2019-qe}. While binary64 (FP64) and binary32 (FP32) are the scientific defaults, many pipelines don't need this level of precision. Mixed precision optimizes performance by combining high- and low-precision formats either temporally (across iterations) or spatially (across operations) without compromising accuracy.
 
-While deep learning (DL) has seen success of automatic mixed precision with frameworks like PyTorch~\cite{Paszke2019-vk} and TensorFlow~\cite{Abadi2016-vm} offering automatic mixed precision (AMP) support as drop-in, adoption in classical neuroimaging remains scarce. These pipelines often lack native abstractions for precision switching, defaulting to FP64 to ensure stability despite the performance penalty.
+While DL has seen success of with PyTorch drop-in support for AMP, adoption in classical neuroimaging remains scarce. These pipelines often lack native abstractions for runtime precision control, defaulting to FP64 to ensure stability despite the performance penalty.
 
 \subsection{Determining Precision Requirements}
-Determining the optimal bit-width for a specific algorithm is difficult. Theoretical analysis is often intractable for complex pipelines, necessitating dynamic analysis. Tools like the VPREC backend of Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} allow for the runtime simulation of arbitrary precision without intrusive code changes. However, this flexibility comes at a cost: VPREC incurs overheads between $2.6\times$ and $16.8\times$~\cite{Chatelain2019-vw}, making it an invaluable diagnostic tool but unsuitable for production-level optimization. Similarly, other dynamic analysis methods require multiple executions of the application to empirically determine precision needs, which is impractical for data sensitive workflows.
+Determining the optimal bit-width for an algorithm is challenging. Theoretical static analysis are impractical for complex pipelines, necessitating dynamic analysis. VPREC backend of Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} allow for the runtime simulation of arbitrary precision without intrusive code changes---only recompilation.
+
+While VPREC's flexibility makes it an invaluable diagnostic tool, its high overheads cost---between $2.6\times$ and $16.8\times$~\cite{Chatelain2019-vw}---make it unsuitable for production-level optimization. Furthermore, the need for multiple executions to empirically determine precision requirements is impractical, where each execution may require significant computational resources.
 
 \subsection{Numerical Stability in MRI Registration}
-Image registration is an iterative optimization process highly susceptible to error propagation given its ill-defined nature, especially in multi-resolution pyramids where coarse-stage inaccuracies amplify in finer stages. Recent studies on the ANTs framework show that numerical uncertainty can cause displacement artifacts up to 0.2mm---comparable to physical head motion~\cite{Mirhakimi2025-qb}.
-
-This creates a critical trade-off: while reduced precision can accelerate registration, it must be managed dynamically to preserve anatomical integrity and avoid clinical misinterpretation.
-
+Image registration is an iterative optimization process highly susceptible to error propagation given its ill-defined nature, especially in multi-resolution pyramids where coarse-stage inaccuracies amplify in finer stages. A recent studiy~\cite{Mirhakimi2025-qb} on the ANTs registration framework show that numerical uncertainty can cause displacement artifacts up to 0.2mm---comparable to physical head motion. This creates a critical trade-off: while reduced precision can accelerate registration, it must be managed carefully to preserve anatomical integrity and avoid clinical misinterpretation.
 
 \section{Method}
 \label{sec:method}
-\subsection{Pipelines}
-\subsubsection{ITK Based Registration}
-\MD{Trim down}
-ANTs registration uses a multi-stage, multi-resolution strategy. Its uses the center of mass of the moving image's intensity to perform an initial alignment. Then, it proceeds through three stages---rigid, affine, and symmetric normalization (SyN)~\cite{Avants2008-ea}---each utilizing four multi-resolution levels. By default, the rigid and affine stages use Mutual Information (MI) as the objective function, while SyN uses Cross-Correlation (CC). The optimization iterates until reaching a convergence threshold ($1\times10^{-6}$, by default) over the last 10 iterations or the maximum iteration count. ANTs leverages the registration framework from The Insight Toolkit (ITK)~\cite{McCormick2014-ok,Yoo2002-ve} for computation.
+\subsection{Pipelines and Datasets}
+\subsubsection{ANTs registration}
+ANTs~\cite{Avants2008-ea} is a widely used registration framework built on the Insight Toolkit (ITK)~\cite{McCormick2014-ok, Yoo2002-ve}. We utilized the standard ANTs registration pipeline, which performs sequential rigid, affine, and Symmetric Normalization (SyN) stages across four multi-resolution levels. The optimization minimizes Mutual Information (MI) for linear stages and Cross-Correlation (CC) for the deformable SyN stage, iterating until convergence ($1\times10^{-6}$) or a maximum iteration count is reached.
 
-\MD{TODO: ITK Elastix (low priority compared to DL models)}
-
-
-\subsubsection{DL Methods}
-\MD{TODO MNIST}
-
-\MD{TODO FastSurfer}
-
-\subsection{Minimum Precision Estimation}
-We adapted Hayford et al.~\cite{Hayford2024-kb} theoretical framework on rounding errors to analyze ANTs registration convergence. Their theorem establishes a link between convergence stability, data precision, the Lipschitz constant (K), and parameter norms. We modified the ITK library to probe the gradient norm $\nabla\mathcal{L}(\theta)$, parameter norm $\|\theta\|$, and estimate $K$ via finite differences at each iteration. These metrics are used to compute the theoretical minimum precision ($p_{min}$) required to ensure the gradient signal exceeds the noise inherent to a given data format. 
-
-\MD{TODO provide more mathematical details}
-
-\subsection{Dynamic Precision Control}
-We leveraged the VPREC backend from Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} to simulate arithmetic operations at arbitrary virtual precisions. We instrumented and recompiled the ITK and ANTs source code to compute the theoretical $p_{min}$ at every iteration. These computed values dynamically drive VPREC probes, which we inserted into the optimization loop to restrict the precision at an iteration-wise granularity. To mitigate frequent oscillations in precision, we applied a moving average smoothing (window $N=5$) to the estimated $p_{min}$. Here forth, we use the term dynamic mixed precision (DMP) to describe this method. Figure~\ref{fig:vprec-probe} illustrate the dynamic instrumentation process.
-% \begin{figure*}[htb!]
-% 	\centering
-% 	\includegraphics[width=\textwidth]{figures/vprec.pdf}
-% 	\caption{}
-% 	\label{fig:vprec-probe}
-% \end{figure*}
-
-\subsection{Validation Metrics}
-We evaluated the accuracy of our DMP model against the FP64 baseline of ANTs by computing the relative difference in similarity metric. We also report the number of precision bits saved by our model compared to the baseline.
-
-\subsection{Dataset \& Code}
 We utilized the \textit{BMB\_1} site from the CoRR dataset~\cite{Zuo2014-ub} to tune and evaluate our method (N=50; age: 30.8 [19.9--59.7]; 52\% F). We processed the anatomical T1-weighted volumes, performing skull-stripping via the \textit{antsBrainExtraction.sh} script. Brain-extracted volumes were visually quality-controlled against the TemplateFlow tpl-MNI152NLin2009cAsym template.
 
-We recompiled ITK and ANTs for the x86-64 architecture, containerizing the pipeline in Docker and converting it to an Apptainer image for HPC execution. The modified source code and experiment scripts are publicly available:
-\begin{itemize}
-    \item ITK: https://github.com/mathdugre/ITK
-    \item ANTs: https://github.com/mathdugre/ANTs
-    \item Experiments: https://github.com/mathdugre/phd-p3
-\end{itemize}
+\subsubsection{MNIST}
+MNIST~\cite{Deng2012-hh} is a widely used dataset of handwritten digits, consisting of 60,000 training and 10,000 testing grayscale images of size 28x28 pixels. We trained a simple convolutional neural network (CNN) base on PyTorch example\footnote{https://github.com/pytorch/examples/tree/main/mnist} for 14 epochs using the Adadelta optimizer~\cite{Zeiler2012-tn} with a learning rate of 1.0 and a batch size of 64. The model architecture includes two convolutional layers followed by max-pooling, and two fully connected layers, with ReLU activations and dropout for regularization.
+
+\subsubsection{Voxelmorph}
+VoxelMorph~\cite{Balakrishnan2019-rx} is a UNet~\cite{Ronneberger2015-dn, Isola2016-lu} model for image registration which learns to predict deformation fields between pairs of images. We trained two versions of the model: a 2D version aligning single slices and a 3D version aligning whole volumes. Both models were trained for 100 epochs using the Adam optimizer~\cite{Kingma2014-uf} with a learning rate of $1\times10^{-4}$ and a batch size of 4. The loss function combined mean squared error (MSE) for image similarity and a regularization term to encourage smooth deformations.
+
+We trained the VoxelMorph 2D and 3D models using the Neurite OASIS dataset~\cite{Marcus2007-nm, Hoopes2022-is}, which contains 414 T1-weighted MRI scans. We utilized the provided affine-aligned volumes and slices (aligned\_norm.nii.gz, slice\_norm.nii.gz), randomly sampling image pairs to learn deformation fields. The data is available at: \url{https://github.com/adalca/medical-datasets/blob/master/neurite-oasis.md}.
+
+\MD{TODO if time allows FastSurfer}
+
+\subsection{Minimum Precision Estimation}
+Hayford et al.~\cite{Hayford2024-kb} proposed a theoretical framework linking convergence stability of gradient-based optimization with its data precision $p$, gradient loss $\|\nabla\mathcal{L}(\theta)\|$, Lipschitz constant $K$, and parameter norm $\|\theta\|$. We adapt their Theorem~1 to estimate the minimum precision ($p_{min}$) required to ensure the gradient signal exceeds the noise inherent to a given data format:
+\begin{equation}
+p > p_{min} = \log_2 \left( \frac{(4+3\sqrt{2}) K \|\theta\|}{\|\nabla\mathcal{L}(\theta)\|} \right) .
+\label{eq:pmin}
+\end{equation}
+We modified the ITK library and developed a drop-in Python function for PyTorch training to retrieve these metrics at each iterations, compute $p_{min}$, and dynamically adjust the precision of the subsequent iteration accordingly. This method allows us to adapt the precision requirements in real-time, ensuring that we maintain convergence while optimizing computational efficiency.
+
+\subsection{Dynamic Precision Control}
+ANTs registration only support FP64 precision, due to a bug preventing computation in FP32~\cite{Dugre2025-fs}. Therefore, we use VPREC to analyse the effect of mixed precision in ANTs by varying the virtual precision simulated based on our $p_{min}$ estimate. For the PyTorch models, we convert the model and data to the appropriate precision at each iteration.
+
+To prevent large overheads from frequent precision changes, we apply a moving average smoothing (window $N=5$) to the estimated $p_{min}$ values. This approach helps to mitigate oscillations in precision requirements across iterations, ensuring a more stable and efficient optimization process.
 
 \section{Results}
+
+\MD{TODO adjust for DL models}
+
 \label{sec:results}
 \subsection{Prediction of precision requirements}
 Figure~\ref{fig:pmin-std-bounds} illustrates the required precision per iteration, estimated via our theoretical model, and the virtual precision set by the VPREC backend. We report the average across all subjects ($N=50$) with standard deviation bounds. In the SyN stage, our model indicates that FP24 remains sufficient for convergence. Conversely, during rigid and affine stages, FP32 suffices for most iterations at level 0. However, as resolution increases and smoothing decreases, the required precision escalates, eventually exceeding FP32. Across all multi-resolution levels, the predicted requirement always breaches the FP32 threshold, though it occasionally lowers back below it before the registration level finishes.
