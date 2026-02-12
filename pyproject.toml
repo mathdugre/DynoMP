@@ -3,12 +3,20 @@ name = "paper-3"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
+    "ipykernel>=7.2.0",
     "kaleido>=1.2.0",
+    "matplotlib>=3.10.8",
     "nbformat>=5.10.4",
-    "numpy>=2.3.5",
+    "numpy>=2.2.6",
     "pandas>=2.3.3",
-    "plotly>=6.5.0",
+    "plotly>=6.5.2",
     "torch>=2.10.0",
+    "torchmetrics>=1.8.2",
+    "torchvision>=0.25.0",
+    "voxelmorph",
 ]
+
+[tool.uv.sources]
+voxelmorph = { git = "https://github.com/voxelmorph/voxelmorph.git", rev = "06f3ea39538e16ae8ba20dda53cb380c54400744" }
