@@ -1,0 +1,244 @@
+% This is a modified version of Springer's LNCS template suitable for anonymized MICCAI 2025 main conference submissions. 
+% Original file: samplepaper.tex, a sample chapter demonstrating the LLNCS macro package for Springer Computer Science proceedings; Version 2.21 of 2022/01/12
+
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encodings may result in incorrect characters.
+%
+\usepackage{graphicx,verbatim}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%\urlstyle{rm}
+
+\usepackage{subcaption}
+% TODO Remove later
+\usepackage[export]{adjustbox} % Add this to your preamble
+\usepackage{color,soul}
+\newcommand{\TG}[1]{\color{blue}\textsc{From Tristan: }#1\color{black}}
+\newcommand{\MD}[1]{\color{magenta}\textsc{From Mathieu: }#1\color{black}}
+\newcommand{\HL}[1]{\hl{#1}}
+% End of remove
+
+\begin{document}
+%
+\title{DynoMP: A Dynamic Mixed Precision Model for Gradient-Based Optimization}
+\titlerunning{DynoMP: Dynamic Mixed Precision Optimization}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\begin{comment}  %% Removed for anonymized MICCAI submission
+\author{First Author\inst{1}\orcidID{0000-1111-2222-3333} \and
+Second Author\inst{2,3}\orcidID{1111-2222-3333-4444} \and
+Third Author\inst{3}\orcidID{2222--3333-4444-5555}}
+%
+\authorrunning{F. Author et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Princeton University, Princeton NJ 08544, USA \and
+Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
+\email{lncs@springer.com}\\
+\url{http://www.springer.com/gp/computer-science/lncs} \and
+ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+\email{\{abc,lncs\}@uni-heidelberg.de}}
+
+\end{comment}
+
+\author{Anonymized Authors}  %% Added for anonymized MICCAI submission
+\authorrunning{Anonymized Author et al.}
+\institute{Anonymized Affiliations \\
+    \email{email@anonymized.com}}
+  
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+Gradient-based optimization, common in both classical image registration (e.g., ANTs) and deep learning (DL) models for medical image computing, is computationally and memory intensive, typically relying on float64 (CPU) or float32 (GPU) precision. Mixed precision combines high- and low-precision floating-point arithmetic to accelerate computation while preserving accuracy. However, current mixed-precision tuning methods are limited. They either require expensive static analysis, which is often impractical for large or complex codebases, or multiple dynamic execution trials. Popular DL frameworks (e.g., PyTorch) offer Automatic Mixed Precision (AMP), which uses different precision levels for specific operators based on expert knowledge. While suitable for many applications, this approach lacks optimization for specific pipelines or datasets. Furthermore, applying mixed precision to classical methods remains challenging.
+
+We introduce DynoMP, a Dynamic Mixed Precision Optimization approach that estimates and adjusts the minimum required bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP on both the classical ANTs registration pipeline (using the CoRR BMB\_1 dataset) and DL model training, including MNIST, VoxelMorph 2D, and VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate that DynoMP can significantly reduce precision compared to default float64 or float32 baselines by adapting to the problem at runtime, all while maintaining the accuracy of the baseline method. This dynamic approach offers a promising pathway for achieving resource-efficient and high-performance medical image computing.
+
+Code is available at \url{https://github.com/anonymized/DynoMP}.
+
+\keywords{First keyword  \and Second keyword \and Another keyword.}
+% Authors must provide keywords and are not allowed to remove this Keyword section.
+
+\end{abstract}
+%
+%
+%
+\section{Introduction}
+\label{sec:introduction}
+\MD{Depending on the scope of the paper, we might want to be more broad the MRI pipelines; i.e. MP as a whole.}
+Registration is a fundamental step in magnetic resonance imaging (MRI) analysis, essential for comparing images across different subjects, time points, or contrasts. This process is computationally and memory-intensive; prior research~\cite{Dugre2025-fs} has demonstrated that a few functions constitute the primary bottleneck for both runtime and memory usage. Accelerating registration would enable researchers to analyze larger cohorts and significantly reduce the associated resource costs (e.g., CPU, memory, energy, and time).
+
+Mixed precision computing, which strategically combines high- and low-precision arithmetic, offers a promising avenue for pipeline acceleration while maintaining acceptable accuracy. The deep learning community has successfully adopted mixed precision (AMP), leading to its robust implementation in frameworks like PyTorch~\cite{Paszke2019-vk} and TensorFlow~\cite{Abadi2016-vm}. However, its potential remains largely unexplored in other domains. Current methods for applying mixed precision to general pipelines face significant challenges: static analysis is often impractical for large or complex codebases, and methods requiring multiple pipeline executions are inefficient when processing heterogeneous data and dealing with compute-intensive workflows.
+
+Another approach to accelerate pipelines is leveraging GPUs. For instance, FireANTs~\cite{TODO}, a GPU port of the widely used Advanced Normalization Tools (ANTs)~\cite{Avants2020-xx}, achieves comparable registration accuracy while dramatically reducing runtime from several hours to less than a minute. Nevertheless, the high cost and limited availability of GPUs often restrict their widespread use in academic settings.
+
+\MD{TODO: revise}
+More recently, several deep learning (DL) models~\cite{FastSurfer, SynthMorph, SythSeg, Others?} proved successful at accelerating classical MRI processing steps without compromising accuracy. While these pipeline often benefits from faster runtime, further improved by their GPU support, mixed precision arithmetic is still beneficial for performance improvement. Indeed, most modern DL image processing model leverage the AMP feature from PyTorch or TensorFlow.
+
+In this work, we introduce a novel method to dynamically adjust the precision of gradient-based optimization process based on a theoretical model derived from Hayford et al.~\cite{Hayford2024-kb}. We apply our method to both classical and DL pipelines: ANTs Registration~\cite{Avants2020-xx}, ITK Elastix~\cite{TODO}, and FastSurfer~\cite{TODO}. We assess the impact of this dynamic precision adjustment on the output accuracy when compared to the default pipeline precision.
+
+\section{Background}
+\label{sec:background}
+
+\subsection{Reduced and Mixed Precision Arithmetic}
+Computational complexity scales quadratically with bit-width~\cite{Wang2019-qe}. While binary64 (FP64) and binary32 (FP32) are the scientific defaults, many pipelines don't need this level of precision. Mixed precision optimizes performance by combining high- and low-precision formats either temporally (across iterations) or spatially (across operations) while maintaining .
+
+While deep learning (DL) has seen success of automatic mixed precision with frameworks like PyTorch~\cite{Paszke2019-vk} and TensorFlow~\cite{Abadi2016-vm} offering automatic mixed precision (AMP) support as drop-in, adoption in classical neuroimaging remains scarce. These pipelines often lack native abstractions for precision switching, defaulting to FP64 to ensure stability despite the performance penalty.
+
+\subsection{Determining Precision Requirements}
+Determining the optimal bit-width for a specific algorithm is difficult. Theoretical analysis is often intractable for complex pipelines, necessitating dynamic analysis. Tools like the VPREC backend of Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} allow for the runtime simulation of arbitrary precision without intrusive code changes. However, this flexibility comes at a cost: VPREC incurs overheads between $2.6\times$ and $16.8\times$~\cite{Chatelain2019-vw}, making it an invaluable diagnostic tool but unsuitable for production-level optimization. Similarly, other dynamic analysis methods require multiple executions of the application to empirically determine precision needs, which is impractical for data sensitive workflows.
+
+\subsection{Numerical Stability in MRI Registration}
+Image registration is an iterative optimization process highly susceptible to error propagation given its ill-defined nature, especially in multi-resolution pyramids where coarse-stage inaccuracies amplify in finer stages. Recent studies on the ANTs framework show that numerical uncertainty can cause displacement artifacts up to 0.2mm---comparable to physical head motion~\cite{Mirhakimi2025-qb}.
+
+This creates a critical trade-off: while reduced precision can accelerate registration, it must be managed dynamically to preserve anatomical integrity and avoid clinical misinterpretation.
+
+
+\section{Method}
+\label{sec:method}
+\subsection{Pipelines}
+\subsubsection{ITK Based Registration}
+\MD{Trim down}
+ANTs registration uses a multi-stage, multi-resolution strategy. Its uses the center of mass of the moving image's intensity to perform an initial alignment. Then, it proceeds through three stages---rigid, affine, and symmetric normalization (SyN)~\cite{Avants2008-ea}---each utilizing four multi-resolution levels. By default, the rigid and affine stages use Mutual Information (MI) as the objective function, while SyN uses Cross-Correlation (CC). The optimization iterates until reaching a convergence threshold ($1\times10^{-6}$, by default) over the last 10 iterations or the maximum iteration count. ANTs leverages the registration framework from The Insight Toolkit (ITK)~\cite{McCormick2014-ok,Yoo2002-ve} for computation.
+
+\MD{TODO: ITK Elastix (low priority compared to DL models)}
+
+
+\subsubsection{DL Methods}
+\MD{TODO MNIST}
+
+\MD{TODO FastSurfer}
+
+\subsection{Minimum Precision Estimation}
+We adapted Hayford et al.~\cite{Hayford2024-kb} theoretical framework on rounding errors to analyze ANTs registration convergence. Their theorem establishes a link between convergence stability, data precision, the Lipschitz constant (K), and parameter norms. We modified the ITK library to probe the gradient norm $\nabla\mathcal{L}(\theta)$, parameter norm $\|\theta\|$, and estimate $K$ via finite differences at each iteration. These metrics are used to compute the theoretical minimum precision ($p_{min}$) required to ensure the gradient signal exceeds the noise inherent to a given data format. 
+
+\MD{TODO provide more mathematical details}
+
+\subsection{Dynamic Precision Control}
+We leveraged the VPREC backend from Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} to simulate arithmetic operations at arbitrary virtual precisions. We instrumented and recompiled the ITK and ANTs source code to compute the theoretical $p_{min}$ at every iteration. These computed values dynamically drive VPREC probes, which we inserted into the optimization loop to restrict the precision at an iteration-wise granularity. To mitigate frequent oscillations in precision, we applied a moving average smoothing (window $N=5$) to the estimated $p_{min}$. Here forth, we use the term dynamic mixed precision (DMP) to describe this method. Figure~\ref{fig:vprec-probe} illustrate the dynamic instrumentation process.
+% \begin{figure*}[htb!]
+% 	\centering
+% 	\includegraphics[width=\textwidth]{figures/vprec.pdf}
+% 	\caption{}
+% 	\label{fig:vprec-probe}
+% \end{figure*}
+
+\subsection{Validation Metrics}
+We evaluated the accuracy of our DMP model against the FP64 baseline of ANTs by computing the relative difference in similarity metric. We also report the number of precision bits saved by our model compared to the baseline.
+
+\subsection{Dataset \& Code}
+We utilized the \textit{BMB\_1} site from the CoRR dataset~\cite{Zuo2014-ub} to tune and evaluate our method (N=50; age: 30.8 [19.9--59.7]; 52\% F). We processed the anatomical T1-weighted volumes, performing skull-stripping via the \textit{antsBrainExtraction.sh} script. Brain-extracted volumes were visually quality-controlled against the TemplateFlow tpl-MNI152NLin2009cAsym template.
+
+We recompiled ITK and ANTs for the x86-64 architecture, containerizing the pipeline in Docker and converting it to an Apptainer image for HPC execution. The modified source code and experiment scripts are publicly available:
+\begin{itemize}
+    \item ITK: https://github.com/mathdugre/ITK
+    \item ANTs: https://github.com/mathdugre/ANTs
+    \item Experiments: https://github.com/mathdugre/phd-p3
+\end{itemize}
+
+\section{Results}
+\label{sec:results}
+\subsection{Prediction of precision requirements}
+Figure~\ref{fig:pmin-std-bounds} illustrates the required precision per iteration, estimated via our theoretical model, and the virtual precision set by the VPREC backend. We report the average across all subjects ($N=50$) with standard deviation bounds. In the SyN stage, our model indicates that FP24 remains sufficient for convergence. Conversely, during rigid and affine stages, FP32 suffices for most iterations at level 0. However, as resolution increases and smoothing decreases, the required precision escalates, eventually exceeding FP32. Across all multi-resolution levels, the predicted requirement always breaches the FP32 threshold, though it occasionally lowers back below it before the registration level finishes.
+\begin{figure*}[htb!]
+    \centering
+    \includegraphics[width=\textwidth]{figures/pmin_std_bounds.png}
+    \caption{}
+    \label{fig:pmin-std-bounds}
+\end{figure*}
+
+\begin{figure*}[htb!]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/mnist_loss.pdf}
+        \caption{MNIST}
+        \label{subfig:mnist-loss}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/vm2d_loss.pdf}
+        \caption{Voxelmorph 2D}
+        \label{subfig:vm2d-loss}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/vm3d_loss.pdf}
+        \caption{Voxelmorph 3D}
+        \label{subfig:vm3d-loss}
+    \end{subfigure}
+    \caption{Loss Curves for the PyTorch Models.}
+    \label{fig:pytorch-loss}
+\end{figure*}
+
+\begin{figure*}[htb!]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/mnist_pmin_moving_avg.pdf}
+        \caption{MNIST}
+        \label{subfig:mnist-pmin}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/vm2d_pmin_moving_avg.pdf}
+        \caption{Voxelmorph 2D}
+        \label{subfig:vm2d-pmin}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/vm3d_pmin_moving_avg.pdf}
+        \caption{Voxelmorph 3D}
+        \label{subfig:vm3d-pmin}
+    \end{subfigure}
+    \caption{Estimated $p_{min}$ for the PyTorch Models.}
+    \label{fig:pytorch-pmin}
+\end{figure*}
+
+\subsection{Limited accuracy loss}
+Figure~\ref{fig:rel-diff} displays the relative accuracy difference between our DMP method and the FP64 baseline at the final iteration, where lower values indicate better performance for our method. We report individual subject differences, along with the mean and quantiles. Overall, the mean relative difference stays below $1\times10^{-4}$, with the vast majority of values ($591/600)$ falling below $1\times10^{-3}$. Notably, our DMP model frequently outperforms the baseline ($267/600$), an effect most pronounced in the affine stage at level 0.
+\begin{figure*}[htb!]
+    \centering
+    \includegraphics[width=\textwidth]{figures/rel_diff_fp64_amp.png}
+    \caption{}
+    \label{fig:rel-diff}
+\end{figure*}
+
+\section{Discussion}
+\label{sec:discussion}
+\subsection{Theoretical Assumptions}
+The theorem from Hayford et al.~\cite{Hayford2024-kb} requires two assumptions: (1) the loss function must be convex, and (2) the gradient of the loss must be K-Lipschitz with $K\le1/\eta$. In practice, verifying these assumptions for complex pipelines is difficult, and for complex optimization problems, the loss convexity assumption is frequently unsatisfied. However, our results demonstrate that we can still leverage this simple model to predict the required minimal precision at each iteration while maintaining acceptable accuracy.
+
+\subsection{Casting Overhead}
+To prevent excessive casting overhead caused by oscillating precision requirements between iterations, we utilize a rolling average over a window size of five. A stricter approach would require the precision to increase monotonically with the iteration count at each resolution level. However, if a noisy prediction were to occur early on, it would unnecessarily penalize performance for the remainder of the level. In future efforts, we could compare both approaches, as well as test different window sizes.
+
+\subsection{Mixed Precision in Practice}
+Implementing mixed precision in a production environment presents several practical challenges. For example, the current version of the ITK library contains a bug that forces input data to be cast to double precision during interpolation computations. This results in unnecessary overhead, as the system must cast single-precision inputs to double and back during processing. Correcting this is difficult due to the complexity and scale of the existing codebase. Furthermore, extending support to other data formats remains non-trivial. On the hardware side, support for mixed precision is limited on standard CPUs; while specialized hardware exists, the cost is often prohibitive. Finally, the system's robustness is sensitive to data heterogeneity, which can lead to critical failures when input consistency is not maintained.
+
+\subsection{Experimental Constraints (Range Constant at 8 Bits)}
+When simulating different data formats with VPREC, we modified only the precision bits and ignored the exponent range to limit the overhead of calculating the correct range. This decision is supported by our previous results~\cite{Dugre2025-fs}, which showed no significant difference in accuracy when varying the exponent range between 7 and 8 for precisions ranging from 7 to 23 bits.
+
+\subsection{Limitations of the FP64 Baseline}
+We assess accuracy relative to an FP64 baseline; however, the theoretically optimal precision and output remain unknown. In image registration, there is no absolute ground truth, as multiple valid solutions can exist. Therefore, while FP64 serves as a high-precision reference, it should not be mistaken for a ground truth validation.
+
+\section{Conclusion}
+\label{sec:conclusion}
+In summary, this work demonstrates that our theoretical model effectively predicts minimal precision requirements for image registration in ANTs, maintaining accuracy even when strict convexity assumptions are relaxed. We employ a rolling average smoothing strategy to mitigate precision oscillation, avoiding the potential performance penalties of a stricter monotonic approach. However, while the potential for computational efficiency is clear, practical application is currently hindered by a casting bug in the ITK library and limited hardware support for diverse data formats. Future adoption will depend on addressing these infrastructural constraints and validating performance on real hardware, rather than relying on virtual precision simulations.
+
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+
+\newpage
+\bibliographystyle{splncs04}
+\bibliography{paper}
+\end{document}
