@@ -888,3 +888,48 @@
   issn      = "0898-929X,1530-8898",
   language  = "en"
 }
+
+@ARTICLE{Hoopes2022-is,
+  title         = "{Learning the effect of registration hyperparameters with
+                   {HyperMorph}}",
+  author        = "Hoopes, Andrew and Hoffmann, Malte and Greve, Douglas N and
+                   Fischl, Bruce and Guttag, John and Dalca, Adrian V",
+  journal       = "arXiv [cs.CV]",
+  abstract      = "We introduce HyperMorph, a framework that facilitates
+                   efficient hyperparameter tuning in learning-based deformable
+                   image registration. Classical registration algorithms perform
+                   an iterative pair-wise optimization to compute a deformation
+                   field that aligns two images. Recent learning-based
+                   approaches leverage large image datasets to learn a function
+                   that rapidly estimates a deformation for a given image pair.
+                   In both strategies, the accuracy of the resulting spatial
+                   correspondences is strongly influenced by the choice of
+                   certain hyperparameter values. However, an effective
+                   hyperparameter search consumes substantial time and human
+                   effort as it often involves training multiple models for
+                   different fixed hyperparameter values and may lead to
+                   suboptimal registration. We propose an amortized
+                   hyperparameter learning strategy to alleviate this burden by
+                   learning the impact of hyperparameters on deformation fields.
+                   We design a meta network, or hypernetwork, that predicts the
+                   parameters of a registration network for input
+                   hyperparameters, thereby comprising a single model that
+                   generates the optimal deformation field corresponding to
+                   given hyperparameter values. This strategy enables fast,
+                   high-resolution hyperparameter search at test-time, reducing
+                   the inefficiency of traditional approaches while increasing
+                   flexibility. We also demonstrate additional benefits of
+                   HyperMorph, including enhanced robustness to model
+                   initialization and the ability to rapidly identify optimal
+                   hyperparameter values specific to a dataset, image contrast,
+                   task, or even anatomical region, all without the need to
+                   retrain models. We make our code publicly available at
+                   http://hypermorph.voxelmorph.net.",
+  month         =  mar,
+  year          =  2022,
+  url           = "http://dx.doi.org/10.48550/arXiv.2203.16680",
+  archivePrefix = "arXiv",
+  primaryClass  = "cs.CV",
+  eprint        = "2203.16680",
+  doi           = "10.48550/arXiv.2203.16680"
+}
