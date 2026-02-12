@@ -1,0 +1,9 @@
+# LaTex build files
+paper.*
+!paper.tex
+!paper.bib
+*.pdf
+*.txt
+
+# Journal template
+tmi.*
