@@ -47,6 +47,52 @@
   language  = "en"
 }
 
+@ARTICLE{Hoffmann2022-hu,
+  title    = "{SynthMorph: Learning Contrast-Invariant Registration Without
+              Acquired Images}",
+  author   = "Hoffmann, Malte and Billot, Benjamin and Greve, Douglas N and
+              Iglesias, Juan Eugenio and Fischl, Bruce and Dalca, Adrian V",
+  journal  = "IEEE transactions on medical imaging",
+  volume   =  41,
+  number   =  3,
+  pages    = "543--558",
+  abstract = "We introduce a strategy for learning image registration without
+              acquired imaging data, producing powerful networks agnostic to
+              contrast introduced by magnetic resonance imaging (MRI). While
+              classical registration methods accurately estimate the spatial
+              correspondence between images, they solve an optimization problem
+              for every new image pair. Learning-based techniques are fast at
+              test time but limited to registering images with contrasts and
+              geometric content similar to those seen during training. We
+              propose to remove this dependency on training data by leveraging a
+              generative strategy for diverse synthetic label maps and images
+              that exposes networks to a wide range of variability, forcing them
+              to learn more invariant features. This approach results in
+              powerful networks that accurately generalize to a broad array of
+              MRI contrasts. We present extensive experiments with a focus on 3D
+              neuroimaging, showing that this strategy enables robust and
+              accurate registration of arbitrary MRI contrasts even if the
+              target contrast is not seen by the networks during training. We
+              demonstrate registration accuracy surpassing the state of the art
+              both within and across contrasts, using a single model.
+              Critically, training on arbitrary shapes synthesized from noise
+              distributions results in competitive performance, removing the
+              dependency on acquired data of any kind. Additionally, since
+              anatomical label maps are often available for the anatomy of
+              interest, we show that synthesizing images from these dramatically
+              boosts performance, while still avoiding the need for real
+              intensity images. Our code is available at doic
+              https://w3id.org/synthmorph.",
+  month    =  mar,
+  year     =  2022,
+  url      = "http://dx.doi.org/10.1109/TMI.2021.3116879",
+  doi      = "10.1109/TMI.2021.3116879",
+  pmc      = "PMC8891043",
+  pmid     =  34587005,
+  issn     = "0278-0062,1558-254X",
+  language = "en"
+}
+
 @ARTICLE{Yoo2002-ve,
   title    = "{Engineering and algorithm design for an image processing Api: a
               technical report on ITK--the Insight Toolkit}",
