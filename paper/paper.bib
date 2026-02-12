@@ -93,6 +93,50 @@
   language = "en"
 }
 
+@ARTICLE{Billot2023-vp,
+  title    = "{SynthSeg: Segmentation of brain MRI scans of any contrast and
+              resolution without retraining}",
+  author   = "Billot, Benjamin and Greve, Douglas N and Puonti, Oula and
+              Thielscher, Axel and Van Leemput, Koen and Fischl, Bruce and
+              Dalca, Adrian V and Iglesias, Juan Eugenio and {ADNI}",
+  journal  = "Medical image analysis",
+  volume   =  86,
+  pages    =  102789,
+  abstract = "Despite advances in data augmentation and transfer learning,
+              convolutional neural networks (CNNs) difficultly generalise to
+              unseen domains. When segmenting brain scans, CNNs are highly
+              sensitive to changes in resolution and contrast: even within the
+              same MRI modality, performance can decrease across datasets. Here
+              we introduce SynthSeg, the first segmentation CNN robust against
+              changes in contrast and resolution. SynthSeg is trained with
+              synthetic data sampled from a generative model conditioned on
+              segmentations. Crucially, we adopt a domain randomisation strategy
+              where we fully randomise the contrast and resolution of the
+              synthetic training data. Consequently, SynthSeg can segment real
+              scans from a wide range of target domains without retraining or
+              fine-tuning, which enables straightforward analysis of huge
+              amounts of heterogeneous clinical data. Because SynthSeg only
+              requires segmentations to be trained (no images), it can learn
+              from labels obtained by automated methods on diverse populations
+              (e.g., ageing and diseased), thus achieving robustness to a wide
+              range of morphological variability. We demonstrate SynthSeg on
+              5,000 scans of six modalities (including CT) and ten resolutions,
+              where it exhibits unparallelled generalisation compared with
+              supervised CNNs, state-of-the-art domain adaptation, and Bayesian
+              segmentation. Finally, we demonstrate the generalisability of
+              SynthSeg by applying it to cardiac MRI and CT scans.",
+  month    =  may,
+  year     =  2023,
+  url      = "http://dx.doi.org/10.1016/j.media.2023.102789",
+  keywords = "CNN; Contrast and resolution invariance; Domain randomisation;
+              Segmentation",
+  doi      = "10.1016/j.media.2023.102789",
+  pmc      = "PMC10154424",
+  pmid     =  36857946,
+  issn     = "1361-8415,1361-8423",
+  language = "en"
+}
+
 @ARTICLE{Yoo2002-ve,
   title    = "{Engineering and algorithm design for an image processing Api: a
               technical report on ITK--the Insight Toolkit}",
