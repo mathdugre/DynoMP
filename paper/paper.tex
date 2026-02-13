@@ -63,13 +63,13 @@
 %
 \begin{abstract}
 	Gradient-based optimization in medical image analysis is computationally intensive, typically relying on fixed high-precision formats (float64 or float32) despite the potential for acceleration via mixed precision. However, current mixed precision methods often require expensive static analysis or fail to adapt dynamically to specific datasets and pipeline execution phases.
-	
+																										
 	We introduce DynoMP, a Dynamic Mixed Precision optimization approach that estimates and adjusts the minimum required bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP on both the classical ANTs registration pipeline (using the CoRR BMB\_1 dataset) and DL model training, including MNIST, VoxelMorph 2D, and VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate that DynoMP can significantly reduce precision compared to default float64 or float32 baselines by adapting to the problem at runtime, all while maintaining the accuracy of the baseline method. This dynamic approach offers a promising pathway for achieving resource-efficient and high-performance medical image computing.
-												
+																																					
 	Code is available at \url{https://github.com/anonymized/DynoMP}.
-												
+																																					
 	\keywords{Mixed Precision \and Image Registration \and Deep Learning.}
-											
+																																				
 \end{abstract}
 %
 %
@@ -81,19 +81,19 @@ Registration is a fundamental step in magnetic resonance imaging (MRI) analysis,
 
 Mixed precision computing, which strategically combines high- and low-precision arithmetic, offers a promising avenue for pipeline acceleration while maintaining acceptable accuracy. The deep learning (DL) community has successfully adopted mixed precision (AMP), leading to its robust implementation in DL frameworks such as PyTorch~\cite{Paszke2019-vk}. However, its potential remains largely unexplored in other domains. Current methods for applying mixed precision to general pipelines face significant challenges: static analysis is often impractical for large or complex codebases, and dynamic analysis methods---requiring multiple pipeline executions---are inefficient when processing heterogeneous data and dealing with compute-intensive workflows.
 
-Leveraging GPUs is an alternative approach to accelerate piplines. For instance, FireANTs~\cite{Jena2024-ud}, a GPU port of the widely used Advanced Normalization Tools (ANTs)~\cite{Avants2020-xx}, achieves comparable registration accuracy while dramatically reducing runtime from several hours to less than a minute. Nevertheless, the high cost and limited availability of GPUs often restrict their widespread use in academic settings.
+Leveraging GPUs is an alternative approach to accelerate pipelines. For instance, FireANTs~\cite{Jena2024-ud}, a GPU port of the widely used Advanced Normalization Tools (ANTs)~\cite{Avants2020-xx}, achieves comparable registration accuracy while dramatically reducing runtime from several hours to less than a minute. Nevertheless, the high cost and limited availability of GPUs often restrict their widespread use in academic settings.
 
 Recent DL models~\cite{Henschel2022-wa, Balakrishnan2019-rx, Hoffmann2022-hu, Billot2023-vp, Zhu2022-uw} proved successful at accelerating classical MRI processing steps without compromising accuracy. While these pipelines often benefit from faster runtime---further improved by their GPU support---mixed precision arithmetic is still beneficial for performance improvement. Indeed, modern DL image processing models often leverage the AMP feature from PyTorch.
 
-In this work, we introduce a novel method to dynamically adjust the precision of gradient-based optimization process based on a theoretical model derived from Hayford et al.~\cite{Hayford2024-kb}. We apply our method to both classical and DL pipelines: ANTs Registration~\cite{Avants2020-xx}, MNIST\cite{Deng2012-hh}\MD{Q: Should I cite the MNIST dataset or the UNET 	architecture?}, and Voxelmorph~\cite{Balakrishnan2019-rx} 2D and 3D models, \MD{TODO: if times allows: FastSurfer~\cite{Henschel2022-wa}}. We assess the impact of this dynamic precision adjustment on the output accuracy when compared to the default pipeline precision.
+In this work, we introduce a novel method to dynamically adjust the precision of gradient-based optimization process based on a theoretical model derived from Hayford et al.~\cite{Hayford2024-kb}. We apply our method to both classical and DL pipelines: ANTs Registration~\cite{Avants2020-xx}, MNIST\cite{Deng2012-hh}\MD{Q: Should I cite the MNIST dataset or the UNET 	architecture?}, and VoxelMorph~\cite{Balakrishnan2019-rx} 2D and 3D models, \MD{TODO: if times allows: FastSurfer~\cite{Henschel2022-wa}}. We assess the impact of this dynamic precision adjustment on the output accuracy when compared to the default pipeline precision.
 
 \section{Background}
 \label{sec:background}
-Computational complexity scales quadratically with bit-width~\cite{Wang2019-qe}. While binary64 (FP64) and binary32 (FP32) are the scientific defaults, many pipelines don't need this level of precision. Mixed precision optimizes performance by combining high- and low-precision formats either temporally (across iterations) or spatially (across operations) without compromising accuracy. While DL has seen success of with PyTorch drop-in support for AMP, adoption in classical neuroimaging remains scarce. These pipelines lack drop-in support for runtime precision control, often defaulting to FP64 to ensure stability despite the performance penalty.
+Computational complexity scales quadratically with bit-width~\cite{Wang2019-qe}. While binary64 (FP64) and binary32 (FP32) are the scientific defaults, many pipelines don't need this level of precision. Mixed precision optimizes performance by combining high- and low-precision formats either temporally (across iterations) or spatially (across operations) without compromising accuracy. While DL has seen success with PyTorch drop-in support for AMP, adoption in classical neuroimaging remains scarce. These pipelines lack drop-in support for runtime precision control, often defaulting to FP64 to ensure stability despite the performance penalty.
 
-Determining the optimal bit-width for an algorithm is challenging. Theoretical static analysis are impractical for complex pipelines, necessitating dynamic analysis. VPREC backend of Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} allow for the runtime simulation of arbitrary precision---up to the native data format---without intrusive code changes, only recompilation. While VPREC's flexibility makes it an invaluable diagnostic tool, its high overheads cost---between $2.6\times$ and $16.8\times$~\cite{Chatelain2019-vw}---make it unsuitable for production-level optimization. Furthermore, the need for multiple executions to empirically determine precision requirements is impractical, where each execution may require significant computational resources.
+To exploit these potential gains in standard pipelines, developers need tools to assess precision requirements without rewriting code. Theoretical static analyses are impractical for complex pipelines, necessitating dynamic analysis. VPREC backend of Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} allow for the runtime simulation of arbitrary precision---up to the native data format---without intrusive code changes, only recompilation. While VPREC's flexibility makes it an invaluable diagnostic tool, its high overhead cost---between $2.6\times$ and $16.8\times$~\cite{Chatelain2019-vw}---make it unsuitable for production-level optimization. Furthermore, the need for multiple executions to empirically determine precision requirements is impractical, where each execution may require significant computational resources.
 
-Image registration is an iterative optimization process highly susceptible to error amplification given its ill-defined nature, especially in multi-resolution pyramids where coarse-stage inaccuracies amplify in finer stages. A recent study~\cite{Mirhakimi2025-qb} on the ANTs linear registration framework show that numerical uncertainty can cause displacement artifacts up to 0.2mm---comparable to physical head motion. This creates a critical trade-off: while reduced precision can accelerate registration, it must be managed carefully to preserve anatomical integrity and avoid clinical misinterpretation.
+While such tools enable analysis, applying reduced precision requires caution, particularly in medical imaging. For example, image registration is an iterative optimization process highly susceptible to error amplification given its ill-defined nature, especially in multi-resolution pyramids where coarse-stage inaccuracies amplify in finer stages. A recent study~\cite{Mirhakimi2025-qb} on the ANTs linear registration framework show that numerical uncertainty can cause displacement artifacts up to 0.2mm---comparable to physical head motion. This creates a critical trade-off: while reduced precision can accelerate medical imaging anlyses, it must be managed carefully to preserve anatomical integrity and avoid clinical misinterpretation.
 
 \section{Method}
 \subsection{Minimum Precision Estimation}
@@ -105,34 +105,36 @@ Hayford et al.~\cite{Hayford2024-kb} proposed a theoretical framework linking co
 We modified the ITK library and developed a drop-in Python function for PyTorch training to retrieve these metrics at each iterations, compute $p_{min}$, and dynamically adjust the precision of the subsequent iteration accordingly. This method allows us to adapt the precision requirements in real-time, ensuring that we maintain convergence while optimizing computational efficiency.
 
 \subsection{Dynamic Precision Control}
-ANTs registration only support FP64 precision, due to a bug preventing computation in FP32~\cite{Dugre2025-fs}. Therefore, we use VPREC to analyse the effect of mixed precision in ANTs by varying the virtual precision simulated based on our $p_{min}$ estimate. For the PyTorch models, we convert the model and data to the appropriate precision at each iteration. To prevent large overheads from frequent precision changes, we apply a moving average smoothing (window $N=5$) to the estimated $p_{min}$ values. This approach helps to mitigate oscillations in precision requirements across iterations, ensuring a more stable and efficient optimization process.
+For practicality, we map $p_{min}$ estimates to the next higher supported precision format. To minimize overhead from frequent switching, we apply a moving average filter (window $N=5$) to smooth precision estimates across iterations. For PyTorch models, weights and data are cast dynamically at each step. For ANTs, we integrated VPREC into the ITK backend, enabling runtime simulation of arbitrary bit-widths during registration.
 
 \section{Experiments}
 \subsection{ANTs registration}
-ANTs~\cite{Avants2008-ea} is a widely used registration framework built on the Insight Toolkit (ITK)~\cite{McCormick2014-ok, Yoo2002-ve}. We utilized the standard ANTs registration pipeline, which performs sequential rigid, affine, and Symmetric Normalization (SyN) stages across four multi-resolution levels. The optimization minimizes Mutual Information (MI) for linear stages and Cross-Correlation (CC) for the deformable SyN stage, iterating until convergence ($10^{-6}$) or a maximum iteration count is reached.
+We used the standard ANTs registration~\cite{Avants2008-ea} pipeline (based on ITK~\cite{McCormick2014-ok, Yoo2002-ve}), which performs sequential rigid, affine, and Symmetric Normalization (SyN) stages across four multi-resolution levels. The optimization minimizes Mutual Information (MI) for linear stages and Cross-Correlation (CC) for the deformable SyN stage, iterating until convergence ($10^{-6}$) or a maximum iteration count is reached.
 
-We utilized the \textit{BMB\_1} site from the CoRR dataset~\cite{Zuo2014-ub} to tune and evaluate our method (N=50; age: 30.8 [19.9--59.7]; 52\% F). We processed the anatomical T1-weighted volumes, performing skull-stripping via the \textit{antsBrainExtraction.sh} script. Brain-extracted volumes were visually quality-controlled against the TemplateFlow tpl-MNI152NLin2009cAsym template.
+We used the \textit{BMB\_1} site ($N=50$) from the CoRR dataset~\cite{Zuo2014-ub}. We processed the anatomical T1-weighted volumes, performing skull-stripping using the \textit{antsBrainExtraction.sh} script. Brain-extracted volumes were visually quality-controlled against the TemplateFlow tpl-MNI152NLin2009cAsym template.
 
-\subsection{MNIST}
-MNIST~\cite{Deng2012-hh} is a widely used dataset of handwritten digits, consisting of 60,000 training and 10,000 testing grayscale images of size 28x28 pixels. We trained a simple convolutional neural network (CNN) base on PyTorch example\footnote{https://github.com/pytorch/examples/tree/main/mnist} for 14 epochs using the Adadelta optimizer~\cite{Zeiler2012-tn} with a learning rate of 1.0 and a batch size of 64. The model architecture includes two convolutional layers followed by max-pooling, and two fully connected layers, with ReLU activations and dropout for regularization.
+\subsection{MNIST Classification}
+We trained a standard convolutional neural network (CNN) on the MNIST dataset~\cite{Deng2012-hh}, utilizing the architecture defined in the official PyTorch examples\footnote{https://github.com/pytorch/examples/tree/main/mnist}. The network consists of two convolutional layers with max-pooling, followed by two fully connected layers using ReLU activations and dropout. Training was performed for 14 epochs with a batch size of 64, optimized using Adadelta~\cite{Zeiler2012-tn} (learning rate 1.0).
 
-\subsection{Voxelmorph}
+\subsection{VoxelMorph}
 VoxelMorph~\cite{Balakrishnan2019-rx} is a UNet~\cite{Ronneberger2015-dn, Isola2016-lu} model for image registration which learns to predict deformation fields between pairs of images. We trained two versions of the model: a 2D version aligning single slices and a 3D version aligning whole volumes. Both models were trained for 100 epochs using the Adam optimizer~\cite{Kingma2014-uf} with a learning rate of $10^{-4}$ and a batch size of 4. The loss function combined mean squared error (MSE) for image similarity and a regularization term to encourage smooth deformations.
 
-We trained the VoxelMorph 2D and 3D models using the Neurite OASIS dataset~\cite{Marcus2007-nm, Hoopes2022-is}, which contains 414 T1-weighted MRI scans. We utilized the provided affine-aligned volumes and slices (aligned\_norm.nii.gz, slice\_norm.nii.gz), randomly sampling image pairs to learn deformation fields. The data is available at: \url{https://github.com/adalca/medical-datasets/blob/master/neurite-oasis.md}.
+We trained the VoxelMorph 2D and 3D models using the Neurite OASIS dataset~\cite{Marcus2007-nm, Hoopes2022-is}, which contains 414 T1-weighted MRI scans. We used the provided affine-aligned volumes and slices (aligned\_norm.nii.gz, slice\_norm.nii.gz), randomly sampling image pairs to learn deformation fields. The data is available at: \url{https://github.com/adalca/medical-datasets/blob/master/neurite-oasis.md}.
 
 \MD{TODO if time allows FastSurfer}
 
+\subsection{Mixed Precision Implementation}
 
+Due to an ITK casting bug restricting ANTs to FP64~\cite{Dugre2025-fs}, we employed VPREC to simulate reduced virtual precisions based on our $p_{min}$ estimate. We limit the selection of virtual precisions to FP16, BF16, FP24, FP32, and FP64 for practical relevance. For PyTorch models on H100 GPUs, we dynamically cast execution to the nearest supported format (FP16, BF16, FP32). We tracked theoretical FP24 requirements but fell back to FP32 given hardware constraints. TF32 was excluded as its mantissa width matches FP16.
 
 \section{Results}
 \label{sec:results}
 \subsection{ANTs Registration}
-Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ from our model across iterations. Our results show the required precision for the SyN stage remains below the FP24 threshold, while the rigid and affine stages require could leverage FP32 or even FP24 for most iterations. For the rigid and affine stages, we obeserve a general increase in required precision across iterations of a specific resolution level.
+Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ from our model across iterations. Our results show the required precision for the SyN stage remains below the FP24 threshold, while the rigid and affine stages require could leverage FP32 or even FP24 for most iterations. For the rigid and affine stages, we observe a general increase in required precision across iterations of a specific resolution level.
 \begin{figure*}[htb!]
 	\centering
 	\includegraphics[width=\textwidth]{figures/pmin_std_bounds.png}
-	\caption{ANTs Registration: Estimated $p_{min}$ across iterations for the rigid, affine, and SyN stages at each multi-resolution level. The shaded areas represent the standard deviation across subjects ($N=50$). The horizontal dashed lines indicate the precision thresholds for FP16, TF32, FP24, FP32, and FP64.}
+	\caption{ANTs Registration: Estimated $p_{min}$ across iterations for the rigid, affine, and SyN stages at each multi-resolution level. The shaded areas represent the standard deviation across subjects ($N=50$). The horizontal dashed lines indicate the precision thresholds for BF16, FP16 FP24, FP32, and FP64.}
 	\label{fig:ants-pmin}
 \end{figure*}
 
@@ -147,7 +149,7 @@ Figure~\ref{fig:ants-loss} confirms that our method maintains accuracy comparabl
 \subsection{Pytorch Models}
 Figure~\ref{fig:pytorch-pmin} shows the estimated $p_{min}$ across iterations for the Pytorch models. For MNIST, our model estimate a $p_min$ of FP16 for the early iteration, but it quickly increases to FP32 and remains for the rest of the training. If FP24 hardware were available, it could be leveraged for a majority (64\%) of the training. As with the ANTs registration, we observe a general increase in required precision across iterations of a specific resolution level.
 
-For the VoxelMorph 2D and 3D models, a negligible number of early batches require FP16 precision, with the vast majority of batches requiring FP32 precision. However, if FP24 hardware were available, it could be leveraged for the entirety of the training. We again observe a general increase in required precision across iterations, although plateauing after the first 2,000 batches.
+VoxelMorph 2D and 3D models require FP24 precision in the vast majority of iteration; only a limited number ($<10$) of the initial batches require FP16 precision. However, due to the lack of FP24 hardware support on H100 GPUs, we used FP32 instead. BF16 and AMP strategies training diverges after a few batches. Again, we observe a general increase in required precision across iterations, although plateauing after the first 2,000 batches.
 \begin{figure*}[htb!]
 	\centering
 	\begin{subfigure}{0.32\textwidth}
@@ -158,16 +160,16 @@ For the VoxelMorph 2D and 3D models, a negligible number of early batches requir
 	\hfill
 	\begin{subfigure}{0.32\textwidth}
 		\includegraphics[width=\textwidth]{figures/vm2d_pmin_moving_avg.pdf}
-		\caption{Voxelmorph 2D}
+		\caption{VoxelMorph 2D}
 		\label{subfig:vm2d-pmin}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.32\textwidth}
 		\includegraphics[width=\textwidth]{figures/vm3d_pmin_moving_avg.pdf}
-		\caption{Voxelmorph 3D}
+		\caption{VoxelMorph 3D}
 		\label{subfig:vm3d-pmin}
 	\end{subfigure}
-	\caption{Estimated $p_{min}$ across batches for the PyTorch models. The horizontal dashed lines indicate the precision thresholds for FP16, TF32, FP24 (not available on H100), FP32, and FP64.}
+	\caption{Estimated $p_{min}$ across batches for the PyTorch models. The horizontal dashed lines indicate the precision thresholds for BF16, FP16, FP24, and FP32; the color of the data points indicates the data format used at runtime.}
 	\label{fig:pytorch-pmin}
 \end{figure*}
 \begin{figure*}[htb!]
@@ -180,13 +182,13 @@ For the VoxelMorph 2D and 3D models, a negligible number of early batches requir
 	\hfill
 	\begin{subfigure}{0.32\textwidth}
 		\includegraphics[width=\textwidth]{figures/vm2d_loss.pdf}
-		\caption{Voxelmorph 2D}
+		\caption{VoxelMorph 2D}
 		\label{subfig:vm2d-loss}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.32\textwidth}
 		\includegraphics[width=\textwidth]{figures/vm3d_loss.pdf}
-		\caption{Voxelmorph 3D}
+		\caption{VoxelMorph 3D}
 		\label{subfig:vm3d-loss}
 	\end{subfigure}
 	\caption{Loss Curves for the PyTorch Models batches for the PyTorch models.}
@@ -194,21 +196,17 @@ For the VoxelMorph 2D and 3D models, a negligible number of early batches requir
 \end{figure*}
 
 \section{Discussion}
-\label{sec:discussion}
-\subsection{Theoretical Assumptions}
+\subsection{Validity of our Theoretical Model}
 The theorem from Hayford et al.~\cite{Hayford2024-kb} requires two assumptions: (1) the loss function must be convex, and (2) the gradient of the loss must be K-Lipschitz with $K\le1/\eta$. In practice, verifying these assumptions for complex pipelines is difficult, and for complex optimization problems, the loss convexity assumption is frequently unsatisfied. However, our results demonstrate that we can still leverage this simple model to predict the required minimal precision at each iteration while maintaining acceptable accuracy.
 
-\subsection{Casting Overhead}
-To prevent excessive casting overhead caused by oscillating precision requirements between iterations, we utilize a rolling average over a window size of five. A stricter approach would require the precision to increase monotonically with the iteration count at each resolution level. However, if a noisy prediction were to occur early on, it would unnecessarily penalize performance for the remainder of the level. In future efforts, we could compare both approaches, as well as test different window sizes.
+We assess accuracy relative to an FP64 baseline; however, the theoretically optimal precision and output remain unknown. In image registration, there is no absolute ground truth, as multiple valid solutions can exist. Therefore, while FP64 serves as a high-precision reference, it should not be mistaken for a ground truth validation.
 
-\subsection{Mixed Precision in Practice}
+\subsection{Implementation Challenges}
 Implementing mixed precision in a production environment presents several practical challenges. For example, the current version of the ITK library contains a bug that forces input data to be cast to double precision during interpolation computations. This results in unnecessary overhead, as the system must cast single-precision inputs to double and back during processing. Correcting this is difficult due to the complexity and scale of the existing codebase. Furthermore, extending support to other data formats remains non-trivial. On the hardware side, support for mixed precision is limited on standard CPUs; while specialized hardware exists, the cost is often prohibitive. Finally, the system's robustness is sensitive to data heterogeneity, which can lead to critical failures when input consistency is not maintained.
 
-\subsection{Experimental Constraints (Range Constant at 8 Bits)}
 When simulating different data formats with VPREC, we modified only the precision bits and ignored the exponent range to limit the overhead of calculating the correct range. This decision is supported by our previous results~\cite{Dugre2025-fs}, which showed no significant difference in accuracy when varying the exponent range between 7 and 8 for precisions ranging from 7 to 23 bits.
 
-\subsection{Limitations of the FP64 Baseline}
-We assess accuracy relative to an FP64 baseline; however, the theoretically optimal precision and output remain unknown. In image registration, there is no absolute ground truth, as multiple valid solutions can exist. Therefore, while FP64 serves as a high-precision reference, it should not be mistaken for a ground truth validation.
+To prevent excessive casting overhead caused by oscillating precision requirements between iterations, we utilize a rolling average over a window size of five. A stricter approach would require the precision to increase monotonically with the iteration count at each resolution level. However, if a noisy prediction were to occur early on, it would unnecessarily penalize performance for the remainder of the level. In future efforts, we could compare both approaches, as well as test different window sizes.
 
 \section{Conclusion}
 \label{sec:conclusion}
