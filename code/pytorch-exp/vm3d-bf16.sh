@@ -3,7 +3,7 @@
 #SBATCH --gpus=h100_20gb:1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=16G
-#SBATCH --time=1-00:00:00
+#SBATCH --time=08:00:00
 #SBATCH --output=logs/slurm/vm3d-bf16-%A_%a.out
 #SBATCH --account=def-glatard
 set -eu
