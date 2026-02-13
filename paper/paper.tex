@@ -63,29 +63,26 @@
 %
 \begin{abstract}
 	Gradient-based optimization in medical image analysis is computationally intensive, typically relying on fixed high-precision formats (float64 or float32) despite the potential for acceleration via mixed precision. However, current mixed precision methods often require expensive static analysis or fail to adapt dynamically to specific datasets and pipeline execution phases.
-																										
+																														
 	We introduce DynoMP, a Dynamic Mixed Precision optimization approach that estimates and adjusts the minimum required bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP on both the classical ANTs registration pipeline (using the CoRR BMB\_1 dataset) and DL model training, including MNIST, VoxelMorph 2D, and VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate that DynoMP can significantly reduce precision compared to default float64 or float32 baselines by adapting to the problem at runtime, all while maintaining the accuracy of the baseline method. This dynamic approach offers a promising pathway for achieving resource-efficient and high-performance medical image computing.
-																																					
+																																									
 	Code is available at \url{https://github.com/anonymized/DynoMP}.
-																																					
+																																									
 	\keywords{Mixed Precision \and Image Registration \and Deep Learning.}
-																																				
+																																								
 \end{abstract}
 %
 %
 %
 \section{Introduction}
 \label{sec:introduction}
-\MD{Depending on the scope of the paper, we might want to be more broad the MRI pipelines; i.e. MP as a whole.}
-Registration is a fundamental step in magnetic resonance imaging (MRI) analysis, essential for comparing images across different subjects, time points, or contrasts. This process is computationally and memory-intensive; prior research~\cite{Dugre2025-fs} has demonstrated that a few functions constitute the primary bottleneck for both runtime and memory usage. Accelerating registration would enable researchers to analyze larger cohorts and significantly reduce the associated resource costs (e.g., CPU, memory, energy, and time).
+Gradient-based optimization is the engine behind many medical image analysis tasks, ranging from classical image registration to the training of deep learning (DL) models. However, these optimization processes are computationally demanding. In particular, 3D deformable registration---essential for comparing images across subjects or time points---remains a significant bottleneck for runtime and memory~\cite{Dugre2025-fs}. As datasets grow larger and models more complex, reducing these computational costs is critical for scalability in clinical and research settings.
 
-Mixed precision computing, which strategically combines high- and low-precision arithmetic, offers a promising avenue for pipeline acceleration while maintaining acceptable accuracy. The deep learning (DL) community has successfully adopted mixed precision (AMP), leading to its robust implementation in DL frameworks such as PyTorch~\cite{Paszke2019-vk}. However, its potential remains largely unexplored in other domains. Current methods for applying mixed precision to general pipelines face significant challenges: static analysis is often impractical for large or complex codebases, and dynamic analysis methods---requiring multiple pipeline executions---are inefficient when processing heterogeneous data and dealing with compute-intensive workflows.
+Mixed precision computing offers a solution by strategically combining high- and low-precision arithmetic to reduce runtime and memory footprints while maintaining accuracy. While widely adopted in DL---thanks to automatic mixed precision (AMP) in PyTorch~\cite{Paszke2019-vk}---its application in classical medical imaging remains limited. Moreover, existing approaches for identifying optimal precision often rely on expensive static analysis or fixed heuristics, failing to adapt to the dynamic numerical stability requirements of specific optimization processes.
 
-Leveraging GPUs is an alternative approach to accelerate pipelines. For instance, FireANTs~\cite{Jena2024-ud}, a GPU port of the widely used Advanced Normalization Tools (ANTs)~\cite{Avants2020-xx}, achieves comparable registration accuracy while dramatically reducing runtime from several hours to less than a minute. Nevertheless, the high cost and limited availability of GPUs often restrict their widespread use in academic settings.
+Recent advances have sought to accelerate pipelines through hardware-specific implementations, such as GPU-ported registration (FireANTs~\cite{Jena2024-ud}) or DL-based substitutes (VoxelMorph~\cite{Balakrishnan2019-rx}, FastSurfer~\cite{Henschel2022-wa}). While effective, these hardware accelerations are not mutually exclusive with precision optimization. In fact, modern GPUs are designed to maximize throughput specifically for lower-precision formats (e.g., FP16, BF16). Therefore, a theoretical approach to dynamic precision control could benefit both classical CPU-based pipelines and modern GPU-accelerated DL models alike.
 
-Recent DL models~\cite{Henschel2022-wa, Balakrishnan2019-rx, Hoffmann2022-hu, Billot2023-vp, Zhu2022-uw} proved successful at accelerating classical MRI processing steps without compromising accuracy. While these pipelines often benefit from faster runtime---further improved by their GPU support---mixed precision arithmetic is still beneficial for performance improvement. Indeed, modern DL image processing models often leverage the AMP feature from PyTorch.
-
-In this work, we introduce a novel method to dynamically adjust the precision of gradient-based optimization process based on a theoretical model derived from Hayford et al.~\cite{Hayford2024-kb}. We apply our method to both classical and DL pipelines: ANTs Registration~\cite{Avants2020-xx}, MNIST\cite{Deng2012-hh}\MD{Q: Should I cite the MNIST dataset or the UNET 	architecture?}, and VoxelMorph~\cite{Balakrishnan2019-rx} 2D and 3D models, \MD{TODO: if times allows: FastSurfer~\cite{Henschel2022-wa}}. We assess the impact of this dynamic precision adjustment on the output accuracy when compared to the default pipeline precision.
+In this work, we introduce DynoMP, a dynamic mixed precision method that adjusts bit-width at runtime based on the theoretical convergence stability of the optimization. Unlike standard AMP, which relies on fixed heuristics, DynoMP estimates the signal-to-noise ratio of the gradient to determine the minimum required precision per iteration. We evaluate our method on diverse gradient-based tasks: classical ANTs registration~\cite{Avants2020-xx}, standard image classification on MNIST~\cite{Deng2012-hh}, and DL-based registration using VoxelMorph~\cite{Balakrishnan2019-rx}. We demonstrate that DynoMP maintains the accuracy of high-precision baselines while unlocking the efficiency potential of lower-precision formats. Our contributions include: (1) a theoretical framework for estimating minimum precision requirements during optimization, (2) a practical implementation of dynamic precision control for both classical and DL pipelines, and (3) empirical validation across multiple tasks and datasets, showcasing the potential for resource-efficient medical image computing.
 
 \section{Background}
 \label{sec:background}
