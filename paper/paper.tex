@@ -134,18 +134,51 @@ ANTs registration only support FP64 precision, due to a bug preventing computati
 To prevent large overheads from frequent precision changes, we apply a moving average smoothing (window $N=5$) to the estimated $p_{min}$ values. This approach helps to mitigate oscillations in precision requirements across iterations, ensuring a more stable and efficient optimization process.
 
 \section{Results}
-
-\MD{TODO adjust for DL models}
-
 \label{sec:results}
-\subsection{Prediction of precision requirements}
-Figure~\ref{fig:pmin-std-bounds} illustrates the required precision per iteration, estimated via our theoretical model, and the virtual precision set by the VPREC backend. We report the average across all subjects ($N=50$) with standard deviation bounds. In the SyN stage, our model indicates that FP24 remains sufficient for convergence. Conversely, during rigid and affine stages, FP32 suffices for most iterations at level 0. However, as resolution increases and smoothing decreases, the required precision escalates, eventually exceeding FP32. Across all multi-resolution levels, the predicted requirement always breaches the FP32 threshold, though it occasionally lowers back below it before the registration level finishes.
+\subsection{ANTs Registration}
+Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ from our model across iterations. Our results show the required precision for the SyN stage remains below the FP24 threshold, while the rigid and affine stages require could leverage FP32 or even FP24 for most iterations. For the rigid and affine stages, we obeserve a general increase in required precision across iterations of a specific resolution level.
 \begin{figure*}[htb!]
     \centering
     \includegraphics[width=\textwidth]{figures/pmin_std_bounds.png}
-    \caption{}
-    \label{fig:pmin-std-bounds}
+    \caption{ANTs Registration: Estimated $p_{min}$ across iterations for the rigid, affine, and SyN stages at each multi-resolution level. The shaded areas represent the standard deviation across subjects ($N=50$). The horizontal dashed lines indicate the precision thresholds for FP16, TF32, FP24, FP32, and FP64.}
+    \label{fig:ants-pmin}
 \end{figure*}
+
+Figure~\ref{fig:ants-loss} confirms that our method maintains accuracy comparable to the FP64 baseline, with a mean relative difference below $1\times10^{-4}$ and the vast majority of values ($591/600$) falling below $1\times10^{-3}$. Notably, our DMP model frequently outperforms the baseline ($267/600$), an effect most pronounced in the affine stage at level 0.
+\begin{figure*}[htb!]
+    \centering
+    \includegraphics[width=\textwidth]{figures/rel_diff_fp64_amp.png}
+    \caption{ANTs Registration: Relative accuracy difference between our DMP method and the FP64 baseline at the final iteration. Lower values indicate better performance for our method. Individual subject differences are shown, along with the mean and quantiles.}
+    \label{fig:ants-loss}
+\end{figure*}
+
+\subsection{Pytorch Models}
+Figure~\ref{fig:pytorch-pmin} shows the estimated $p_{min}$ across iterations for the Pytorch models. For MNIST, our model estimate a $p_min$ of FP16 for the early iteration, but it quickly increases to FP32 and remains for the rest of the training. If FP24 hardware were available, it could be leveraged for a majority (64\%) of the training. As with the ANTs registration, we observe a general increase in required precision across iterations of a specific resolution level.
+
+For the VoxelMorph 2D and 3D models, a negligible number of early batches require FP16 precision, with the vast majority of batches requiring FP32 precision. However, if FP24 hardware were available, it could be leveraged for the entirety of the training. We again observe a general increase in required precision across iterations, although plateauing after the first 2,000 batches.
+\begin{figure*}[htb!]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/mnist_pmin_moving_avg.pdf}
+        \caption{MNIST}
+        \label{subfig:mnist-pmin}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/vm2d_pmin_moving_avg.pdf}
+        \caption{Voxelmorph 2D}
+        \label{subfig:vm2d-pmin}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/vm3d_pmin_moving_avg.pdf}
+        \caption{Voxelmorph 3D}
+        \label{subfig:vm3d-pmin}
+    \end{subfigure}
+    \caption{Estimated $p_{min}$ across batches for the PyTorch models. The horizontal dashed lines indicate the precision thresholds for FP16, TF32, FP24 (not available on H100), FP32, and FP64.}
+    \label{fig:pytorch-pmin}
+\end{figure*}
+
 
 \begin{figure*}[htb!]
     \centering
@@ -166,41 +199,10 @@ Figure~\ref{fig:pmin-std-bounds} illustrates the required precision per iteratio
         \caption{Voxelmorph 3D}
         \label{subfig:vm3d-loss}
     \end{subfigure}
-    \caption{Loss Curves for the PyTorch Models.}
+    \caption{Loss Curves for the PyTorch Models batches for the PyTorch models. The horizontal dashed lines indicate the precision thresholds for FP16, TF32, FP24 (not available on H100), FP32, and FP64.}
     \label{fig:pytorch-loss}
 \end{figure*}
 
-\begin{figure*}[htb!]
-    \centering
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{figures/mnist_pmin_moving_avg.pdf}
-        \caption{MNIST}
-        \label{subfig:mnist-pmin}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{figures/vm2d_pmin_moving_avg.pdf}
-        \caption{Voxelmorph 2D}
-        \label{subfig:vm2d-pmin}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{figures/vm3d_pmin_moving_avg.pdf}
-        \caption{Voxelmorph 3D}
-        \label{subfig:vm3d-pmin}
-    \end{subfigure}
-    \caption{Estimated $p_{min}$ for the PyTorch Models.}
-    \label{fig:pytorch-pmin}
-\end{figure*}
-
-\subsection{Limited accuracy loss}
-Figure~\ref{fig:rel-diff} displays the relative accuracy difference between our DMP method and the FP64 baseline at the final iteration, where lower values indicate better performance for our method. We report individual subject differences, along with the mean and quantiles. Overall, the mean relative difference stays below $1\times10^{-4}$, with the vast majority of values ($591/600)$ falling below $1\times10^{-3}$. Notably, our DMP model frequently outperforms the baseline ($267/600$), an effect most pronounced in the affine stage at level 0.
-\begin{figure*}[htb!]
-    \centering
-    \includegraphics[width=\textwidth]{figures/rel_diff_fp64_amp.png}
-    \caption{}
-    \label{fig:rel-diff}
-\end{figure*}
 
 \section{Discussion}
 \label{sec:discussion}
