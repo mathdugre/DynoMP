@@ -2,7 +2,7 @@
 paper.*
 !paper.tex
 !paper.bib
-*.pdf
+paper.pdf
 *.txt
 
 # MICCAI template
