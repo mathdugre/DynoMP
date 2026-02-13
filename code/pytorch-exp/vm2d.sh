@@ -20,6 +20,14 @@ uv run ./code/voxelmorph_train.py \
 
 uv run ./code/voxelmorph_train.py \
     --input $INPUT_DIR \
+    --output $OUTPUT_DIR/2d-fp16.pt \
+    --dim 2 \
+    --epochs 100 \
+    --save-every 100\
+    --strategy fp16
+
+uv run ./code/voxelmorph_train.py \
+    --input $INPUT_DIR \
     --output $OUTPUT_DIR/2d-bf16.pt \
     --dim 2 \
     --epochs 100 \
