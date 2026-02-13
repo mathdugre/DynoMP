@@ -186,7 +186,7 @@ def main():
 
     # Setup logging
     logs = Path("logs", "mnist")
-    logs.mkdir(exist_ok=True)
+    logs.mkdir(exist_ok=True, parents=True)
     log_file = Path(logs / f"mnist_train_{args.strategy}.log")
     setup_logging(log_file)
 

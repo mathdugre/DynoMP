@@ -318,7 +318,7 @@ def main():
 
     # Setup logging
     logs = Path("logs", "voxelmorph")
-    logs.mkdir(exist_ok=True)
+    logs.mkdir(exist_ok=True, parents=True)
     log_file = Path(logs / f"voxelmorph_train_{args.dim}d_{args.strategy}.log")
     setup_logging(log_file)
 
