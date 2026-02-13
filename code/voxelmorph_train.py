@@ -312,7 +312,7 @@ def main():
         "--strategy",
         type=str,
         default="default",
-        help="Training strategy to use (default, dmp, amp, or bf16)",
+        help="Training strategy to use (default, dmp, amp, fp16, or bf16)",
     )
     args = parser.parse_args()
 
@@ -343,6 +343,9 @@ def main():
     if args.strategy == "bf16":
         model = model.to(torch.bfloat16)
         logging.info("Using BF16 precision for training")
+    if args.strategy == "fp16":
+        model = model.to(torch.float16)
+        logging.info("Using FP16 precision for training")
 
     # PMIN context
     pmin_ctx = PminContext()

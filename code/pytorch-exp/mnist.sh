@@ -16,6 +16,12 @@ uv run ./code/mnist_train.py \
 
 uv run ./code/mnist_train.py \
     --input $DATASET_DIR \
+    --output $OUTPUT_DIR/mnist-fp16.pt \
+    --epochs 14 \
+    --strategy fp16
+
+uv run ./code/mnist_train.py \
+    --input $DATASET_DIR \
     --output $OUTPUT_DIR/mnist-bf16.pt \
     --epochs 14 \
     --strategy bf16
