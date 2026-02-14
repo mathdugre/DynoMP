@@ -1587,7 +1587,7 @@ requires-dist = [
     { name = "torch", specifier = ">=2.10.0" },
     { name = "torchmetrics", specifier = ">=1.8.2" },
     { name = "torchvision", specifier = ">=0.25.0" },
-    { name = "voxelmorph", git = "https://github.com/voxelmorph/voxelmorph.git?rev=06f3ea39538e16ae8ba20dda53cb380c54400744" },
+    { name = "voxelmorph", git = "https://github.com/voxelmorph/voxelmorph.git?rev=6fea3e8722c3db7edeffc663700acb0d5bcbb3c3" },
 ]
 
 [[package]]
@@ -2733,7 +2733,7 @@ wheels = [
 [[package]]
 name = "voxelmorph"
 version = "0.2"
-source = { git = "https://github.com/voxelmorph/voxelmorph.git?rev=06f3ea39538e16ae8ba20dda53cb380c54400744#06f3ea39538e16ae8ba20dda53cb380c54400744" }
+source = { git = "https://github.com/voxelmorph/voxelmorph.git?rev=6fea3e8722c3db7edeffc663700acb0d5bcbb3c3#6fea3e8722c3db7edeffc663700acb0d5bcbb3c3" }
 dependencies = [
     { name = "neurite" },
     { name = "scikit-image", version = "0.25.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },

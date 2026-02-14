@@ -19,4 +19,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-voxelmorph = { git = "https://github.com/voxelmorph/voxelmorph.git", rev = "06f3ea39538e16ae8ba20dda53cb380c54400744" }
+voxelmorph = { git = "https://github.com/voxelmorph/voxelmorph.git", rev = "6fea3e8722c3db7edeffc663700acb0d5bcbb3c3" }
