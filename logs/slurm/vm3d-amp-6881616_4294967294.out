@@ -1,0 +1,25 @@
+2026-02-13 13:36:35,333 - INFO - Using device: cuda
+2026-02-13 13:36:36,373 - INFO - Training for 100 epochs...
+Epochs:   0%|          | 0/100 [00:00<?, ?it/s]Epochs:   0%|          | 0/100 [00:01<?, ?it/s]
+Traceback (most recent call last):
+  File "/home/mdugre/DynoMP/./code/voxelmorph_train.py", line 438, in <module>
+    main()
+  File "/home/mdugre/DynoMP/./code/voxelmorph_train.py", line 385, in main
+    avg_loss = train_epoch(
+  File "/home/mdugre/DynoMP/./code/voxelmorph_train.py", line 220, in train_epoch
+    displacement, warped_source = model(
+  File "/home/mdugre/DynoMP/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/mdugre/DynoMP/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/mdugre/DynoMP/.venv/lib/python3.10/site-packages/voxelmorph/nn/models.py", line 234, in forward
+    warped_source = self.spatial_transformer(source, pos_displacement)
+  File "/home/mdugre/DynoMP/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/mdugre/DynoMP/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/mdugre/DynoMP/.venv/lib/python3.10/site-packages/voxelmorph/nn/modules.py", line 103, in forward
+    return vxm.spatial_transform(
+  File "/home/mdugre/DynoMP/.venv/lib/python3.10/site-packages/voxelmorph/functional.py", line 687, in spatial_transform
+    num_non_spatial, num_spatial = ne.functional._parse_non_spatial_dims(
+AttributeError: module 'neurite.functional' has no attribute '_parse_non_spatial_dims'. Did you mean: 'parse_non_spatial_dims'?
