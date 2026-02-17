@@ -1,0 +1,3 @@
+[submodule "containers/fuzzy"]
+	path = containers/fuzzy
+	url = git@github.com:verificarlo/fuzzy.git
