@@ -1,0 +1,10 @@
+**/protobuf/** *
+**/c10/** *
+**/torch/** *argmax*
+**/ReduceOps.cpp *
+**_ops** *argmax*
+* *argmax*
+* *argmin*
+**/sleef/** *exp*
+**/sleef/** *log*
+* *arange*

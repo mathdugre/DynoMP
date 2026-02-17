@@ -57,7 +57,7 @@ RUN : \
 # Build ITK
 RUN : \
     && cd /tmp/itk/build \
-    && make -j1 \
+    && make -j \
     && :
 # Install ITK
 RUN : \
@@ -98,7 +98,7 @@ RUN : \
 # Build ANTs
 RUN : \
     && cd /tmp/ants/build \
-    && make -j1 \
+    && make -j \
     && :
 # Install ANTs
 RUN : \
@@ -116,11 +116,11 @@ RUN wget https://ndownloader.figshare.com/files/3133832 -O oasis.zip \
     && unzip oasis.zip -d /opt \
     && rm -rf oasis.zip
 
-FROM verificarlo/verificarlo
-COPY --from=builder /opt/ants /opt/ants
-COPY --from=builder /opt/MICCAI2012-Multi-Atlas-Challenge-Data /opt/templates/OASIS
-COPY --from=builder /tmp/ants /tmp/ants
-COPY --from=builder /tmp/itk /tmp/itk
+# FROM verificarlo/verificarlo
+# COPY --from=builder /opt/ants /opt/ants
+# COPY --from=builder /opt/MICCAI2012-Multi-Atlas-Challenge-Data /opt/templates/OASIS
+# COPY --from=builder /tmp/ants /tmp/ants
+# COPY --from=builder /tmp/itk /tmp/itk
 
 ENV ANTSPATH="/opt/ants/bin" \
     PATH="/opt/ants/bin:$PATH" \
