@@ -28,7 +28,7 @@ fi
 
 if [[ ! -f ${ANTS_AMP_SIF} ]]; then
     echo "Pulling ANTs AMP SIF image..."
-    apptainer pull ${ANTS_AMP_SIF} docker://mathdugre/ants:amp:ohbm2026
+    apptainer pull ${ANTS_AMP_SIF} docker://mathdugre/ants:amp-miccai2026
 fi
 
 echo "Setup completed"

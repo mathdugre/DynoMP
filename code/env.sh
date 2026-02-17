@@ -8,4 +8,4 @@ export SLURM_OPTS="--account=rrg-glatard"
 
 # SIF Images
 export ANTS_BASE_SIF=${SIF_DIR}/ants-baseline.sif
-export ANTS_AMP_SIF=${SIF_DIR}/ants-amp-ohbm2026.sif
+export ANTS_AMP_SIF=${SIF_DIR}/ants-amp-miccai2026.sif

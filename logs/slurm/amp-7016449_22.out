@@ -1,0 +1,7 @@
+start
+[INFO] Ensuring presence of Dataset(/project/rrg-glatard/mdugre/datasets/corr/RawDataBIDS/BMB_1) to get /project/rrg-glatard/mdugre/datasets/corr/RawDataBIDS/BMB_1 
+[INFO] Ensuring presence of Dataset(/project/rrg-glatard/mdugre/templateflow) to get /project/rrg-glatard/mdugre/templateflow 
+action summary:
+  get (notneeded: 2)
+Setup completed
+done with setup

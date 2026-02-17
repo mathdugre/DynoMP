@@ -1,0 +1,8 @@
+start
+[INFO] Ensuring presence of Dataset(/project/rrg-glatard/mdugre/datasets/corr/RawDataBIDS/BMB_1) to get /project/rrg-glatard/mdugre/datasets/corr/RawDataBIDS/BMB_1 
+[INFO] Ensuring presence of Dataset(/project/rrg-glatard/mdugre/templateflow) to get /project/rrg-glatard/mdugre/templateflow 
+action summary:
+  get (notneeded: 2)
+Setup completed
+done with setup
+slurmstepd: error: *** JOB 7016542 ON rc32230 CANCELLED AT 2026-02-17T03:02:29 DUE TO TIME LIMIT ***
