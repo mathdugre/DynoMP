@@ -1,4 +1,4 @@
-FROM verificarlo/verificarlo AS builder
+FROM verificarlo/verificarlo:v2.1.0 AS builder
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
@@ -57,7 +57,7 @@ RUN : \
 # Build ITK
 RUN : \
     && cd /tmp/itk/build \
-    && make -j \
+    && make -j1 \
     && :
 # Install ITK
 RUN : \
@@ -98,7 +98,7 @@ RUN : \
 # Build ANTs
 RUN : \
     && cd /tmp/ants/build \
-    && make -j \
+    && make -j1 \
     && :
 # Install ANTs
 RUN : \
@@ -116,13 +116,11 @@ RUN wget https://ndownloader.figshare.com/files/3133832 -O oasis.zip \
     && unzip oasis.zip -d /opt \
     && rm -rf oasis.zip
 
-# FROM verificarlo/verificarlo
-# COPY --from=builder /opt/ants /opt/ants
-# COPY --from=builder /opt/MICCAI2012-Multi-Atlas-Challenge-Data /opt/templates/OASIS
-# COPY --from=builder /tmp/ants /tmp/ants
-# COPY --from=builder /tmp/itk /tmp/itk
-
-RUN mkdir -p /opt/templates && cp -r /opt/MICCAI2012-Multi-Atlas-Challenge-Data /opt/templates/OASIS
+FROM verificarlo/verificarlo
+COPY --from=builder /opt/ants /opt/ants
+COPY --from=builder /opt/MICCAI2012-Multi-Atlas-Challenge-Data /opt/templates/OASIS
+COPY --from=builder /tmp/ants /tmp/ants
+COPY --from=builder /tmp/itk /tmp/itk
 
 ENV ANTSPATH="/opt/ants/bin" \
     PATH="/opt/ants/bin:$PATH" \
