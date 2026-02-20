@@ -21,10 +21,10 @@ sbatch --dependency=$brain_extraction \
     ./code/antsRegistration.sbatch
 
 ###############
-# ANTs (AMP) #
+# ANTs (DynoMP) #
 ##############
-export SIF_IMG=${ANTS_AMP_SIF}
-export EXPERIMENT_NAME="amp"
+export SIF_IMG=${ANTS_DYNOMP_SIF}
+export EXPERIMENT_NAME="dynomp"
 sbatch --dependency=$brain_extraction \
     ${SLURM_OPTS} \
     --array=0-$(( ${#SUBJECTS[@]} - 1 )) \

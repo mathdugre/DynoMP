@@ -1,4 +1,4 @@
-export WORK_DIR=$SCRATCH/ants-amp-paper
+export WORK_DIR=$SCRATCH/ants-dynomp-paper
 export TEMPLATEFLOW_DIR=${PROJECT_HOME}/templateflow
 export SIF_DIR=${PROJECT_HOME}/containers
 export DATA_DIR=${PROJECT_HOME}/datasets/corr/RawDataBIDS/BMB_1
@@ -8,4 +8,4 @@ export SLURM_OPTS="--account=rrg-glatard"
 
 # SIF Images
 export ANTS_BASE_SIF=${SIF_DIR}/ants-baseline.sif
-export ANTS_AMP_SIF=${SIF_DIR}/ants-amp-miccai2026.sif
+export ANTS_DYNOMP_SIF=${SIF_DIR}/ants-dynomp-miccai2026.sif

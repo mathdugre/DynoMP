@@ -26,9 +26,9 @@ if [[ ! -f ${ANTS_BASE_SIF} ]]; then
     apptainer pull ${ANTS_BASE_SIF} docker://mathdugre/ants:p2-baseline
 fi
 
-if [[ ! -f ${ANTS_AMP_SIF} ]]; then
-    echo "Pulling ANTs AMP SIF image..."
-    apptainer pull ${ANTS_AMP_SIF} docker://mathdugre/ants:amp-miccai2026
+if [[ ! -f ${ANTS_DYNOMP_SIF} ]]; then
+    echo "Pulling ANTs DynoMP SIF image..."
+    apptainer pull ${ANTS_DYNOMP_SIF} docker://mathdugre/ants:dynomp-miccai2026
 fi
 
 echo "Setup completed"

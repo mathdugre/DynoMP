@@ -48,7 +48,7 @@ def train_epoch(
     optimizer,
     *,
     pmin_ctx: PminContext,
-    dmp: bool = False,
+    dynomp: bool = False,
     amp: bool = False,
 ):
     model.train()
@@ -73,7 +73,7 @@ def train_epoch(
 
         loss.backward()
 
-        if dmp:
+        if dynomp:
             # Compute the required precision bits
             adjust_precision(
                 model,
@@ -180,7 +180,7 @@ def main():
         "--strategy",
         type=str,
         default="default",
-        help="Training strategy to use (default, dmp, amp, fp16, or bf16)",
+        help="Training strategy to use (default, dynomp, amp, fp16, or bf16)",
     )
     args = parser.parse_args()
 
@@ -243,7 +243,7 @@ def main():
             train_loader,
             optimizer,
             pmin_ctx=pmin_ctx,
-            dmp=(args.strategy == "dmp"),
+            dynomp=(args.strategy == "dynomp"),
             amp=(args.strategy == "amp"),
         )
         # Log progress

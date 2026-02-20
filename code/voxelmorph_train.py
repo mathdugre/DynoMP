@@ -169,7 +169,7 @@ def train_epoch(
     steps_per_epoch: int,
     pmin_ctx: PminContext,
     device: str = "cuda",
-    dmp: bool = False,
+    dynomp: bool = False,
     amp: bool = False,
 ) -> float:
     """
@@ -195,8 +195,8 @@ def train_epoch(
         The PMIN context for dynamic mixed precision.
     device : str, optional
         The device to train on, by default "cuda".
-    dmp : bool, optional
-        Whether to use Dynamic Mixed Precision (DMP) variant of VoxelMorph,
+    dynomp : bool, optional
+        Whether to use Dynamic Mixed Precision (DynoMP) variant of VoxelMorph,
         by default False.
     amp: bool, optional
         Whether to use Automatic Mixed Precision (AMP) for training, by default False.
@@ -238,8 +238,8 @@ def train_epoch(
         loss = loss_weights[0] * img_loss + loss_weights[1] * grad_loss
         loss.backward()
 
-        # DMP Strategy: Adjust precision based on PMIN moving average
-        if dmp:
+        # DynoMP Strategy: Adjust precision based on PMIN moving average
+        if dynomp:
             dtype = adjust_precision(
                 model,
                 pmin_ctx=pmin_ctx,
@@ -303,16 +303,11 @@ def main():
     parser.add_argument(
         "--dim", type=int, default=3, help="Dimension of the data (2 or 3)"
     )
-    # parser.add_argument(
-    #     "--dmp",
-    #     action="store_true",
-    #     help="Use Dynamic Mixed Precision (DMP) variant of VoxelMorph",
-    # )
     parser.add_argument(
         "--strategy",
         type=str,
         default="default",
-        help="Training strategy to use (default, dmp, amp, fp16, or bf16)",
+        help="Training strategy to use (default, dynomp, amp, fp16, or bf16)",
     )
     args = parser.parse_args()
 
@@ -392,7 +387,7 @@ def main():
             steps_per_epoch=args.steps_per_epoch,
             pmin_ctx=pmin_ctx,
             device=device,
-            dmp=(args.strategy == "dmp"),
+            dynomp=(args.strategy == "dynomp"),
             amp=(args.strategy == "amp"),
         )
 

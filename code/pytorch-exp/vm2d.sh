@@ -12,11 +12,11 @@ uv run ./code/voxelmorph_train.py \
 
 uv run ./code/voxelmorph_train.py \
     --input $INPUT_DIR \
-    --output $OUTPUT_DIR/2d-dmp.pt \
+    --output $OUTPUT_DIR/2d-dynomp.pt \
     --dim 2 \
     --epochs 100 \
     --save-every 100\
-    --strategy dmp
+    --strategy dynomp
 
 uv run ./code/voxelmorph_train.py \
     --input $INPUT_DIR \

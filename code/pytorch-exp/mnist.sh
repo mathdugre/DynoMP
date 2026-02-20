@@ -10,9 +10,9 @@ uv run ./code/mnist_train.py \
 
 uv run ./code/mnist_train.py \
     --input $DATASET_DIR \
-    --output $OUTPUT_DIR/mnist-dmp.pt \
+    --output $OUTPUT_DIR/mnist-dynomp.pt \
     --epochs 14 \
-    --strategy dmp
+    --strategy dynomp
 
 uv run ./code/mnist_train.py \
     --input $DATASET_DIR \
