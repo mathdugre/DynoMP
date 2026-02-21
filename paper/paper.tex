@@ -126,13 +126,13 @@ We trained the VoxelMorph 2D and 3D models using the Neurite OASIS dataset~\cite
 Due to an ITK casting bug restricting ANTs to FP64~\cite{Dugre2025-fs}, we employed VPREC to simulate reduced virtual precisions based on our $p_{min}$ estimate. We limit the selection of virtual precisions to FP16, BF16, FP24, FP32, and FP64 for practical relevance. For PyTorch models on H100 GPUs, we dynamically cast the model and data during execution to the nearest supported format (FP16, BF16, FP32). We tracked theoretical FP24 requirements but fell back to FP32 given hardware constraints. TF32 was excluded as its mantissa width matches FP16. We summarize the precision formats and their characteristics in Table~\ref{tab:precisions}.
 \begin{table}[h]
 	\centering
-	\caption{Data Formats Evaluation Summary: X indicates inclusion.}
+	\caption{Data Formats Evaluation Summary: X indicates inclusion in $\mathcal{P}$.}
 	\label{tab:precisions}
 	\begin{tabular}{lcccccc}
 		\hline
 		                    & BF16 & FP16 & TF32 & FP24 & FP32 & FP64 \\
 		\hline
-		\textbf{ITK (ANTs)} & -    & X    & -    & X    & X    & X    \\
+		\textbf{ANTs (ITK)} & -    & X    & -    & X    & X    & X    \\
 		\textbf{PyTorch}    & X    & X    & -    & -    & X    & -    \\
 	\end{tabular}
 \end{table}
