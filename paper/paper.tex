@@ -112,11 +112,17 @@ In this work, we introduce DynoMP, a dynamic mixed precision method that adjusts
 
 \section{Method}
 \subsection{Minimum Precision Estimation}
-Hayford et al.~\cite{Hayford2024-kb} proposed a theoretical framework linking convergence stability of gradient-based optimization with its data precision $p$, gradient loss $\|\nabla\mathcal{L}(\theta)\|$, Lipschitz constant $K$, and parameter norm $\|\theta\|$. We adapt their Theorem~1 to estimate the minimum precision ($p_{min}$) required to ensure the gradient signal exceeds the noise inherent to a given data format:
+Hayford et al.~\cite{Hayford2024-kb} proposed a theoretical framework linking
+convergence stability of gradient-based optimization with its data precision $p$
+and gradient loss $\nabla\mathcal{L}$, assuming that $\mathcal{L}$
+is Lipschitz-continuous with constant $K$ \TG{add any other assumption on $\mathcal{L}$ here}. We adapt their Theorem~1 to estimate
+the minimum precision ($p_{min}$) required to ensure the gradient signal exceeds
+the noise inherent to a given data format:
 \begin{equation}
 	p > p_{min} = \log_2 \left( \frac{(4+3\sqrt{2}) K \|\theta\|}{\|\nabla\mathcal{L}(\theta)\|} \right) .
 	\label{eq:pmin}
 \end{equation}
+\TG{Add a few sentences here to give more intuition about the equation}
 In practice, computing the Lipschitz constant $K$ is non-trivial, so we empirically estimate it using a finite difference approach:
 \begin{equation}
 	K \approx \frac{\|\nabla\mathcal{L}(\theta_{t+1}) - \nabla\mathcal{L}(\theta_{t})\|}{\|\theta_{t+1} - \theta_{t}\|} .
@@ -124,30 +130,86 @@ In practice, computing the Lipschitz constant $K$ is non-trivial, so we empirica
 To compute the norm of $\theta$ and $\nabla\mathcal{L}(\theta)$, we flatten their values into a single vector and compute the Euclidean norm. We modified the ITK library and developed a drop-in Python function for PyTorch training to retrieve these metrics at each iteration, compute $p_{min}$, and dynamically adjust the precision of the subsequent iteration accordingly. This method allows us to adapt the precision requirements in real-time, ensuring that we maintain convergence while optimizing computational efficiency.
 
 \subsection{Dynamic Precision Control Policy}
-To prevent excessive casting overhead caused by oscillating precision requirements between iterations, we first apply a moving average filter (window $N=5$) to yield a smoothed estimate $\bar{p}_{min}$. 
-
-Because hardware and software libraries only support discrete precision formats, the continuous estimate $p_{min}$ must be mapped to a usable bit-width. We define a set of available precision formats $\mathcal{P}$ (e.g., corresponding to FP16, BF16, FP32, etc.). At each optimization step, the target precision $p_{target}$ is selected by rounding up to the nearest supported format $p_{target} = \min \{ p \in \mathcal{P} \mid p \ge \bar{p}_{min} \}$. This policy guarantees that the selected precision always satisfies the theoretical lower bound required for stability, while aggressively downcasting whenever the optimization landscape permits.
+To prevent excessive casting overhead caused by oscillating precision
+requirements between iterations, we first apply a moving average filter (window
+$N=5$) to yield a smoothed estimate $\bar{p}_{min}$. Because hardware and
+software libraries only support discrete precision formats, the continuous
+estimate $p_{min}$ must be mapped to a usable bit-width. We define a set of
+available precision formats $\mathcal{P}$ (e.g., corresponding to FP16, BF16,
+FP32, etc.). At each optimization step, the target precision $p_{target}$ is
+selected by rounding up to the nearest supported format $p_{target} = \min \{ p
+\in \mathcal{P} \mid p \ge \bar{p}_{min} \}$. This policy guarantees that the
+selected precision always satisfies the theoretical lower bound required for
+stability, while aggressively downcasting whenever the optimization landscape
+permits.
 
 \subsection{Virtual Precision Simulation}
-Validating convergence behavior across arbitrary bit-widths is challenging due to limited hardware support for non-standard floating-point formats. To address this, we use the VPREC backend from Verificarlo~\cite{Chatelain2019-vw}, which instruments standard floating-point operations to simulate reduced precision by truncating mantissa bits. This approach allows us to model numerical noise and stability on standard CPUs without requiring specialized hardware. To integrate this, we recompiled the ITK library with Verificarlo support and modified the ANTs registration pipeline to link against this instrumented build. We excluded critical metric calculations from instrumentation to prevent convergence failure. At each step, arithmetic operations are cast to the target virtual precision $p_{target}$, enabling the evaluation of DynoMP's policy across an extensive collection of data formats without extensive re-engineering of the underlying libraries.
+Validating convergence behavior across arbitrary bit-widths is challenging due
+to limited hardware support for non-standard floating-point formats. To address
+this, we use the VPREC backend from Verificarlo~\cite{Chatelain2019-vw}, which
+instruments standard floating-point operations to simulate reduced precision by
+truncating mantissa bits. This approach allows us to model numerical noise and
+stability on standard CPUs without requiring specialized hardware. To integrate
+this, we recompiled the ITK library with Verificarlo support and modified the
+ANTs registration pipeline to link against this instrumented build. We excluded
+critical metric calculations from instrumentation to prevent convergence
+failure. At each step, arithmetic operations are cast to the target virtual
+precision $p_{target}$, enabling the evaluation of DynoMP's policy across an
+extensive collection of data formats without extensive re-engineering of the
+underlying libraries.
 
 \section{Experiments}
 \subsection{Pipelines and Datasets}
 \subsubsection{ANTs Registration}
-We used the standard ANTs registration~\cite{Avants2008-ea} pipeline (based on ITK~\cite{McCormick2014-ok, Yoo2002-ve}), which performs sequential rigid, affine, and Symmetric Normalization (SyN) stages across four multi-resolution levels. The optimization minimizes Mutual Information (MI) for linear stages and Cross-Correlation (CC) for the deformable SyN stage, iterating until convergence ($10^{-6}$) or a maximum iteration count is reached.
+We used the standard ANTs registration~\cite{Avants2008-ea} pipeline (based on
+ITK~\cite{McCormick2014-ok, Yoo2002-ve}), which performs sequential rigid,
+affine, and Symmetric Normalization (SyN) stages across four multi-resolution
+levels. The optimization minimizes Mutual Information (MI) for linear stages and
+Cross-Correlation (CC) for the deformable SyN stage, iterating until convergence
+($10^{-6}$) or a maximum iteration count is reached.
 
-We used the \textit{BMB\_1} site ($N=50$) from the CoRR dataset~\cite{Zuo2014-ub}. We processed the anatomical T1-weighted volumes, performing skull-stripping using the \textit{antsBrainExtraction.sh} script. Brain-extracted volumes were visually quality-controlled against the TemplateFlow tpl-MNI152NLin2009cAsym template.
+We used the \textit{BMB\_1} site ($N=50$) from the CoRR
+dataset~\cite{Zuo2014-ub}. We processed the anatomical T1-weighted volumes,
+performing skull-stripping using the \textit{antsBrainExtraction.sh} script.
+Brain-extracted volumes were visually quality-controlled against the
+TemplateFlow tpl-MNI152NLin2009cAsym template.
 
 \subsubsection{MNIST Classification}
-We trained a standard convolutional neural network (CNN) on the MNIST dataset~\cite{Deng2012-hh}, utilizing the architecture defined in the official PyTorch examples\footnote{https://github.com/pytorch/examples/tree/main/mnist}. The network consists of two convolutional layers with max-pooling, followed by two fully connected layers using ReLU activations and dropout. Training was performed for 14 epochs with a batch size of 64, optimized using Adadelta~\cite{Zeiler2012-tn} (learning rate 1.0).
+We trained a standard convolutional neural network (CNN) on the MNIST
+dataset~\cite{Deng2012-hh}, utilizing the architecture defined in the official
+PyTorch examples\footnote{https://github.com/pytorch/examples/tree/main/mnist}.
+The network consists of two convolutional layers with max-pooling, followed by
+two fully connected layers using ReLU activations and dropout. Training was
+performed for 14 epochs with a batch size of 64, optimized using
+Adadelta~\cite{Zeiler2012-tn} (learning rate 1.0).
 
 \subsubsection{VoxelMorph}
-VoxelMorph~\cite{Balakrishnan2019-rx} is a UNet~\cite{Ronneberger2015-dn, Isola2016-lu} model for image registration which learns to predict deformation fields between pairs of images. We trained two versions of the model: a 2D version aligning single slices and a 3D version aligning whole volumes. Both models were trained for 100 epochs using the Adam optimizer~\cite{Kingma2014-uf} with a learning rate of $10^{-4}$ and a batch size of 4. The loss function combined mean squared error (MSE) for image similarity and a regularization term to encourage smooth deformations.
+VoxelMorph~\cite{Balakrishnan2019-rx} is a UNet~\cite{Ronneberger2015-dn,
+Isola2016-lu} model for image registration which learns to predict deformation
+fields between pairs of images. We trained two versions of the model: a 2D
+version aligning single slices and a 3D version aligning whole volumes. Both
+models were trained for 100 epochs using the Adam optimizer~\cite{Kingma2014-uf}
+with a learning rate of $10^{-4}$ and a batch size of 4. The loss function
+combined mean squared error (MSE) for image similarity and a regularization term
+to encourage smooth deformations.
 
-We trained the VoxelMorph 2D and 3D models using the Neurite OASIS dataset~\cite{Marcus2007-nm, Hoopes2022-is}, which contains 414 T1-weighted MRI scans. We used the provided affine-aligned volumes and slices (aligned\_norm.nii.gz, slice\_norm.nii.gz), randomly sampling image pairs to learn deformation fields. The data is available at: \url{https://github.com/adalca/medical-datasets/blob/master/neurite-oasis.md}.
+We trained the VoxelMorph 2D and 3D models using the Neurite OASIS
+dataset~\cite{Marcus2007-nm, Hoopes2022-is}, which contains 414 T1-weighted MRI
+scans. We used the provided affine-aligned volumes and slices
+(aligned\_norm.nii.gz, slice\_norm.nii.gz), randomly sampling image pairs to
+learn deformation fields. The data is available at:
+\url{https://github.com/adalca/medical-datasets/blob/master/neurite-oasis.md}.
 
 \subsection{Mixed Precision Implementation}
-Due to an ITK casting bug restricting ANTs to FP64~\cite{Dugre2025-fs}, we employed VPREC to simulate reduced virtual precisions based on our $p_{min}$ estimate. We limit the selection of virtual precisions to FP16, BF16, FP24, FP32, and FP64 for practical relevance. For PyTorch models on H100 GPUs, we dynamically cast the model and data during execution to the nearest supported format (FP16, BF16, FP32). We tracked theoretical FP24 requirements but fell back to FP32 given hardware constraints. TF32 was excluded as its mantissa width matches FP16. We summarize the precision formats and their characteristics in Table~\ref{tab:precisions}.
+Due to an ITK casting bug restricting ANTs to FP64~\cite{Dugre2025-fs}, we
+employed VPREC to simulate reduced virtual precisions based on our $p_{min}$
+estimate. We limited the selection of virtual precisions to FP16, BF16, FP24,
+FP32, and FP64 for practical relevance. For PyTorch models on H100 GPUs, we
+dynamically cast the model and data during execution to the nearest supported
+format (FP16, BF16, FP32). We tracked theoretical FP24 requirements but fell
+back to FP32 given hardware constraints. TF32 was excluded as its mantissa width
+matches FP16. We summarize the precision formats and their characteristics in
+Table~\ref{tab:precisions}.
 \begin{table}[b!]
 	\centering
 	\caption{Data Formats Evaluation Summary: X indicates inclusion in $\mathcal{P}$.}
@@ -163,7 +225,12 @@ Due to an ITK casting bug restricting ANTs to FP64~\cite{Dugre2025-fs}, we emplo
 \end{table}
 
 \section{Results}
-Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ from our model across iterations. Our results show the required precision for the SyN stage remains below the FP24 threshold, while the rigid and affine stages could leverage FP32 or even FP24 for most iterations (47\%). For the rigid and affine stages, we observe a general increase in required precision across iterations within a resolution level.
+Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ from our model across
+iterations. Our results show the required precision for the SyN stage remains
+below the FP24 threshold, while the rigid and affine stages require FP24 or FP32
+for most iterations (47\%). For the rigid and affine stages, we
+observe a general increase in required precision across iterations within a
+resolution level \TG{can you link this to literature on mixed precision?}.
 \begin{figure*}[b!]
 	\centering
 	\includegraphics[width=\textwidth]{figures/pmin_std_bounds.png}
@@ -171,10 +238,19 @@ Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ from our model across
 	\label{fig:ants-pmin}
 \end{figure*}
 
-To evaluate whether our proposed DynoMP method degraded registration accuracy, we compared the relative loss differences against the FP64 baseline across all multi-resolution stages using a one-tailed t-test. As detailed in Table~\ref{tab:ants-stats}, the mixed-precision implementation yielded no statistically significant degradation in any of the tested stage-level pairs ($p > 0.05$, Bonferroni corrected). Furthermore, simultaneous confidence intervals confirmed that the relative difference in loss was strictly bounded near zero, demonstrating that the new method performs on par with the baseline without practically meaningful divergence. Figure~\ref{fig:ants-loss} depicts the distribution of relative loss differences across stages and levels.
+To evaluate whether our proposed DynoMP method degraded registration accuracy,
+we compared the relative loss differences against the FP64 baseline across all
+multi-resolution stages. As detailed in
+Table~\ref{tab:ants-stats}, the mixed-precision implementation yielded no
+statistically significant degradation in any of the tested stage-level pairs (one-tailed t-test, $p
+> 0.05$, Bonferroni corrected). Furthermore, simultaneous confidence intervals
+confirmed that the relative difference in loss was strictly bounded near zero,
+demonstrating that the new method performs on par with the baseline without
+practically meaningful divergence. Figure~\ref{fig:ants-loss} depicts the
+distribution of relative loss differences across stages and levels.
 \begin{table}[b!]
 	\centering
-	\caption{Relative loss differences between DynoMP and the FP64 baseline across all registration stages: rigid (R), affine (A), and SyN (S). Tests evaluated degradation  ($\alpha=0.05$, Bonferroni corrected for 12 simultaneous tests). All confidence intervals encompass zero, indicating performance on par with the baseline.}
+	\caption{Relative loss differences between DynoMP and the FP64 baseline across all registration stages: rigid (R), affine (A), and SyN (S). Tests evaluated degradation  ($\alpha=0.05$, Bonferroni corrected for 12 simultaneous tests). All confidence intervals encompass zero, indicating performance on par with the baseline. \TG{not sure what the ``status'' column means, if you meant to denote the result of the test I would just remove it}}
 	\label{tab:ants-stats}
 	\begin{tabular}{lcccl}
 		\toprule
@@ -202,9 +278,23 @@ To evaluate whether our proposed DynoMP method degraded registration accuracy, w
 	\label{fig:ants-loss}
 \end{figure}
 
-Figure~\ref{fig:pytorch-pmin} shows the estimated $p_{min}$ across iterations for the PyTorch models. For MNIST, our model estimates a $p_{min}$ of FP16 for the early iterations, but it quickly increases to FP32 and remains for the rest of the training. If FP24 hardware were available, it could be leveraged for a majority (64\%) of the training. As with the ANTs registration, we observe a general increase in required precision across iterations.
+Figure~\ref{fig:pytorch-pmin} shows the estimated $p_{min}$ across iterations
+for the PyTorch models. For MNIST, our model estimates a $p_{min}$ of FP16 for
+the early iterations, but it quickly increases to FP32 and remains for the rest
+of the training. If FP24 hardware were available, it could be leveraged for a
+majority (64\%) of the training. As with the ANTs registration, we observe a
+general increase in required precision across iterations.
 
-VoxelMorph 2D and 3D models require FP24 precision in the vast majority of iterations; only a limited number ($<10$) of the initial batches require FP16 precision. However, due to the lack of FP24 hardware support on H100 GPUs, we used FP32 instead. Training with BF16 and AMP strategies diverges after a few batches. We omit the results for FP16, as the gradient vanished, preventing estimation of $p_{min}$. Again, we observe a general increase in required precision across iterations, although plateauing after the first 2,000 batches.
+VoxelMorph 2D and 3D models require FP24 precision in the vast majority of
+iterations; only a limited number ($<10$) of the initial batches require FP16
+precision. However, due to the lack of FP24 hardware support on H100 GPUs, we
+used FP32 instead. Training with BF16 and AMP strategies diverges after a few
+batches. We omit the results for FP16, as the gradient vanished, preventing
+estimation of $p_{min}$. Again, we observe a general increase in required
+precision across iterations, although plateauing after the first 2,000 batches.
+\TG{The conclusions could be clarified here. I think you could just say that
+your results demonstrate that while BF16 won't work for voxelmorph, FP24 would
+be sufficient, which would motivate its hardware support for this application.}
 \begin{figure*}[b!]
 	\centering
 	\begin{subfigure}{0.32\textwidth}
@@ -252,14 +342,36 @@ VoxelMorph 2D and 3D models require FP24 precision in the vast majority of itera
 
 \section{Discussion and Conclusion}
 % \subsection{The Need for Intermediate Precision}
-Our analysis indicates a misalignment between current hardware capabilities and the numerical requirements of medical image analysis tasks. In both classical registration (ANTs) and DL models (VoxelMorph), our theoretical model frequently identified FP24 as a sufficient precision level. Standard FP16 and BF16 often led to divergence or significant error amplification, whereas FP32 exceeded the numerical requirements. Native hardware support for intermediate formats like FP24 is currently limited on standard CPUs and modern GPUs, often necessitating a default to FP32. By quantifying dynamic precision requirements, DynoMP provides empirical evidence for the potential utility of intermediate precision formats. Until such support becomes more widespread, our method offers a strategy for maximizing efficiency on existing architectures by utilizing lower precision formats when numerical stability permits.
+Our analysis indicates a misalignment between current hardware capabilities and
+the numerical requirements of medical image analysis tasks \TG{rephrase as an
+opportunity: your analysis indicates that implementing FP24 would be highly
+beneficial for voxelmorph DL models}. In both classical registration (ANTs) and DL models
+(VoxelMorph), our theoretical model frequently identified FP24 as a sufficient
+precision level. Standard FP16 and BF16 often led to divergence or significant
+error amplification, whereas FP32 exceeded the numerical requirements. Native
+hardware support for intermediate formats like FP24 is currently limited on
+standard CPUs and modern GPUs, often necessitating a default to FP32. By
+quantifying dynamic precision requirements, DynoMP provides empirical evidence
+for the potential utility of intermediate precision formats. Until such support
+becomes more widespread, our method offers a strategy for maximizing efficiency
+on existing architectures by utilizing lower precision formats when numerical
+stability permits.
 
 % \subsection{Legacy Software Constraints}
 Implementing dynamic mixed precision in existing scientific codebases highlights technical challenges. For example, previous work~\cite{Dugre2025-fs} identified a casting issue in ITK that forces interpolation operations into double precision (FP64). This behavior increases computational overhead and negates the benefits of using lower-precision inputs.
 Addressing this limitation requires refactoring the library's core templated architecture, where high-precision assumptions are deeply embedded. However, our VPREC simulations suggest that overcoming these constraints would yield significant efficiency gains, highlighting the critical need to modernize foundational libraries for flexible, hardware-aware precision control.
 
 % \subsection{Theoretical Applicability}
-The theoretical bound proposed by Hayford et al.~\cite{Hayford2024-kb} assumes conditions such as loss convexity and Lipschitz continuity. In complex tasks like deformable image registration, these assumptions may not strictly hold. Additionally, validation in medical image registration often relies on high-precision (FP64) baselines rather than ground truth, as the problem is ill-posed. Despite these factors, our empirical results indicate that the $p_{min}$ estimate serves as a reliable proxy for optimization stability, with DynoMP maintaining baseline accuracy across the tested pipelines. Future work will investigate adaptive smoothing techniques and explore establishing numerical thresholds of acceptable accuracy for clinical applications using overlap metrics such as the Dice score.
+The theoretical bound proposed by Hayford et al.~\cite{Hayford2024-kb} assumes
+conditions such as \TG{avoid ``such as'' in this context: just be exhaustive and accurate about assumptions} loss convexity and Lipschitz continuity. In complex tasks
+like deformable image registration, these assumptions may not strictly hold.
+Additionally, validation in medical image registration often relies on
+high-precision (FP64) baselines rather than ground truth, as the problem is
+ill-posed. Despite these factors, our empirical results indicate that the
+$p_{min}$ estimate serves as a reliable proxy for optimization stability, with
+DynoMP maintaining baseline accuracy across the tested pipelines. Future work
+will investigate adaptive smoothing techniques and explore establishing
+numerical thresholds of acceptable accuracy for clinical applications.
 
 % \subsection{Conclusion}
 In summary, DynoMP bridges theoretical optimization stability with practical mixed precision computing. By dynamically estimating the minimum required bit-width at runtime, we demonstrate that medical imaging pipelines can operate effectively below standard FP64/FP32 formats without compromising accuracy. While broad adoption is currently limited by complex software architectures and the availability of intermediate-precision hardware, DynoMP establishes a theoretical framework for advancing resource-efficient medical image computing.
