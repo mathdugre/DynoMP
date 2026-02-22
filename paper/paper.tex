@@ -64,13 +64,13 @@
 %
 \begin{abstract}
 	Gradient-based optimization in medical image analysis is computationally intensive, typically relying on fixed high-precision formats (float64 or float32) despite the potential for acceleration via mixed precision. However, current mixed precision methods often require expensive static analysis or fail to adapt dynamically to specific datasets and pipeline execution phases.
-																																																																
+																																																																		
 	We introduce DynoMP, a Dynamic Mixed Precision optimization approach that estimates and adjusts the minimum required bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP on both the classical ANTs registration pipeline (using the CoRR BMB\_1 dataset) and DL model training, including MNIST, VoxelMorph 2D, and VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate that DynoMP can significantly reduce precision compared to default float64 or float32 baselines by adapting to the problem at runtime, all while maintaining the accuracy of the baseline method. This dynamic approach offers a promising pathway for achieving resource-efficient and high-performance medical image computing.
-																																																																											
+																																																																													
 	Code is available at \url{https://anonymous.4open.science/r/DynoMP-83F2}.
-																																																																											
+																																																																													
 	\keywords{Mixed Precision \and Image Registration \and Deep Learning.}
-																																																																										
+																																																																												
 \end{abstract}
 %
 %
@@ -163,7 +163,7 @@ We assessed the non-inferiority of our method compared to the FP64 baseline usin
 \begin{figure}[htb!]
 	\centering
 	\includegraphics[width=\textwidth]{figures/rel_diff_fp64_dynomp.png}
-	\caption{ANTs Registration: Relative accuracy difference between our DynoMP method and the FP64 baseline at the final iteration. Lower values indicate better performance for our method. Individual subject differences are shown, along with the mean and quantiles.}
+	\caption{ANTs Registration: Relative accuracy difference between our DynoMP method and the FP64 baseline at the final iteration. Lower values indicate better performance for our method. Outliers are indicated in red.}
 	\label{fig:ants-loss}
 \end{figure}
 
@@ -216,22 +216,19 @@ VoxelMorph 2D and 3D models require FP24 precision in the vast majority of itera
 \end{figure*}
 
 \section{Discussion and Conclusion}
-\subsection{The Need for Intermediate Precision}
-Our analysis indicates a misalignment between current hardware capabilities and the numerical requirements of medical image analysis tasks. In both classical registration (ANTs) and DL models (VoxelMorph), our theoretical model frequently identified FP24 as a sufficient precision level. Standard FP16 and BF16 often led to divergence or significant error amplification, whereas FP32 exceeded the numerical requirements.
+% \subsection{The Need for Intermediate Precision}
+Our analysis indicates a misalignment between current hardware capabilities and the numerical requirements of medical image analysis tasks. In both classical registration (ANTs) and DL models (VoxelMorph), our theoretical model frequently identified FP24 as a sufficient precision level. Standard FP16 and BF16 often led to divergence or significant error amplification, whereas FP32 exceeded the numerical requirements. Native hardware support for intermediate formats like FP24 is currently limited on standard CPUs and modern GPUs, often necessitating a default to FP32. By quantifying dynamic precision requirements, DynoMP provides empirical evidence for the potential utility of intermediate precision formats. Until such support becomes more widespread, our method offers a strategy for maximizing efficiency on existing architectures by utilizing lower precision formats when numerical stability permits.
 
-Native hardware support for intermediate formats like FP24 is currently limited on standard CPUs and modern GPUs, often necessitating a default to FP32. By quantifying dynamic precision requirements, DynoMP provides empirical evidence for the potential utility of intermediate precision formats. Until such support becomes more widespread, our method offers a strategy for maximizing efficiency on existing architectures by utilizing lower precision formats when numerical stability permits.
-
-\subsection{Legacy Software Constraints}
+% \subsection{Legacy Software Constraints}
 Implementing dynamic mixed precision in existing scientific codebases highlights technical challenges. For example, previous work~\cite{Dugre2025-fs} identified a casting issue in ITK that forces interpolation operations into double precision (FP64). This behavior increases computational overhead and negates the benefits of using lower-precision inputs.
 Addressing this limitation requires refactoring the library's core templated architecture, where high-precision assumptions are deeply embedded. However, our VPREC simulations suggest that overcoming these constraints would yield significant efficiency gains, highlighting the critical need to modernize foundational libraries for flexible, hardware-aware precision control.
 
-\subsection{Theoretical Applicability}
-The theoretical bound proposed by Hayford et al.~\cite{Hayford2024-kb} assumes conditions such as loss convexity and Lipschitz continuity. In complex tasks like deformable image registration, these assumptions may not strictly hold. Additionally, validation in medical image registration often relies on high-precision (FP64) baselines rather than ground truth, as the problem is ill-posed.
+% \subsection{Theoretical Applicability}
+The theoretical bound proposed by Hayford et al.~\cite{Hayford2024-kb} assumes conditions such as loss convexity and Lipschitz continuity. In complex tasks like deformable image registration, these assumptions may not strictly hold. Additionally, validation in medical image registration often relies on high-precision (FP64) baselines rather than ground truth, as the problem is ill-posed. Despite these factors, our empirical results indicate that the $p_{min}$ estimate serves as a reliable proxy for optimization stability, with DynoMP maintaining baseline accuracy across the tested pipelines. Future work will investigate adaptive smoothing techniques and explore establishing numerical threshold of acceptable accuracy for clinical applications using overlap metrics such as the Dice score.
 
-Despite these factors, our empirical results indicate that the $p_{min}$ estimate serves as a reliable proxy for optimization stability, with DynoMP maintaining baseline accuracy across the tested pipelines. Future work will investigate adaptive smoothing techniques and explore establishing numerical threshold of acceptable accuracy for clinical applications using overlap metrics such as the Dice score.
-
-\subsection{Conclusion}
+% \subsection{Conclusion}
 In summary, DynoMP bridges theoretical optimization stability with practical mixed precision computing. By dynamically estimating the minimum required bit-width at runtime, we demonstrate that medical imaging pipelines can operate effectively below standard FP64/FP32 formats without compromising accuracy. While broad adoption is currently limited by complex software architectures and the availability of intermediate-precision hardware, DynoMP establishes a theoretical framework for advancing resource-efficient medical image computing.
+
 
 % ---- Bibliography ----
 %
