@@ -124,7 +124,7 @@ DynoMP/
 If you find this code useful, please cite our paper:
 
 ```bibtex
-@inproceedings{mathdugre2026dynomp,
+@inproceedings{anonymized2026dynomp,
   title={DynoMP: Dynamic Mixed Precision Optimization},
   author={Anonymized},
   booktitle={Medical Image Computing and Computer Assisted Intervention -- MICCAI 2026},
