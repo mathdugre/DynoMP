@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=vm3d
+#SBATCH --job-name=vm3d-default
 #SBATCH --gpus=h100_20gb:1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=16G
 #SBATCH --time=08:00:00
-#SBATCH --output=logs/slurm/vm3d-%A_%a.out
+#SBATCH --output=logs/slurm/vm3d-default-%A_%a.out
 #SBATCH --account=def-glatard
 set -eu
 
