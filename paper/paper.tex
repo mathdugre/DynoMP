@@ -63,9 +63,22 @@
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-	Gradient-based optimization in medical image analysis is computationally intensive, typically relying on fixed high-precision formats (float64 or float32) despite the potential for acceleration via mixed precision. However, current mixed precision methods often require expensive static analysis or fail to adapt dynamically to specific datasets and pipeline execution phases.
-																																																																							
-	We introduce DynoMP, a Dynamic Mixed Precision optimization approach that estimates and adjusts the minimum required bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP on both the classical ANTs registration pipeline (using the CoRR BMB\_1 dataset) and DL model training, including MNIST, VoxelMorph 2D, and VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate that DynoMP can significantly reduce precision compared to default float64 or float32 baselines by adapting to the problem at runtime, all while maintaining the accuracy of the baseline method. This dynamic approach offers a promising pathway for achieving resource-efficient and high-performance medical image computing.
+	Gradient-based optimization in medical image analysis is computationally
+	intensive, typically relying on fixed high-precision formats (float64 or
+	float32) despite the potential for acceleration via mixed precision.
+	However, current mixed precision methods often require expensive static
+	analysis or fail to adapt dynamically to specific datasets and pipeline
+	execution phases. We introduce DynoMP, a Dynamic Mixed Precision
+	optimization approach that estimates and adjusts the minimum required
+	bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP
+	on both the classical ANTs registration pipeline (using the CoRR BMB\_1
+	dataset) and Deep-Learning model training, including MNIST, VoxelMorph 2D, and
+	VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate
+	that DynoMP can significantly reduce precision compared to default float64
+	or float32 baselines by adapting to the problem at runtime, all while
+	maintaining the accuracy of the baseline method. This dynamic approach
+	offers a promising pathway for achieving resource-efficient and
+	high-performance medical image computing.
 																																																																																		
 	Code is available at \url{https://anonymous.4open.science/r/DynoMP-83F2}.
 																																																																																		
@@ -80,7 +93,20 @@ Gradient-based optimization drives many medical image analysis tasks, from class
 
 Mixed precision computing addresses this by strategically combining high- and low-precision arithmetic to reduce resource usage while maintaining accuracy. Since computational complexity scales quadratically with bit-width~\cite{Wang2019-qe}, moving away from standard double (FP64) or single (FP32) precision yields substantial gains. While DL frameworks like PyTorch~\cite{Paszke2019-vk} widely adopt Automatic Mixed Precision (AMP), its application in classical medical imaging remains limited. Instead, current acceleration efforts focus largely on hardware-specific implementations (e.g., FireANTs~\cite{Jena2024-ud}) or DL-based substitutes (e.g., VoxelMorph~\cite{Balakrishnan2019-rx}, FastSurfer~\cite{Henschel2022-wa}). However, these methods are not mutually exclusive with precision optimization; dynamic precision control could benefit both CPU-based pipelines and modern GPU-accelerated models.
 
-Applying reduced precision requires caution. For example, registration is an ill-posed optimization problem where errors can amplify across multi-resolution stages. Recent work~\cite{Mirhakimi2025-qb} shows that numerical uncertainty in ANTs linear registration can induce artifacts comparable to physical head motion (0.2mm). Therefore, precision reduction must be managed carefully to preserve anatomical integrity. Similarly for DL models, if this noise exceeds the gradient signal, optimization can stall or diverge. Standard AMP in PyTorch primarily addresses underflow issues through loss scaling and manages dynamic range but does not dynamically assess whether the mantissa bits are sufficient to represent the update direction accurately. While existing tools like Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} enable rigorous precision analysis, they incur prohibitive runtime overheads ($2.6\times$ to $16.8\times$)~\cite{Chatelain2019-vw}, making them unsuitable for real-time optimization. Furthermore, Verificarlo is limited to instrumentation on CPU.
+Applying reduced precision requires caution. For example, registration is an
+ill-posed optimization problem where errors can amplify across multi-resolution
+stages. Recent work~\cite{Mirhakimi2025-qb} shows that numerical uncertainty in
+ANTs linear registration can induce artifacts comparable to physical head motion
+(0.2mm). Therefore, precision reduction must be managed carefully to preserve
+anatomical integrity. Similarly for DL models, if this noise exceeds the
+gradient signal, optimization can stall or diverge. Standard AMP in PyTorch
+primarily addresses underflow issues through loss scaling and manages dynamic
+range but does not dynamically assess whether the mantissa bits are sufficient
+to represent the update direction accurately. While existing tools like
+Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} enable rigorous precision
+analysis, they incur prohibitive runtime overheads ($2.6\times$ to
+$16.8\times$)~\cite{Chatelain2019-vw}, making them unsuitable for real-time
+optimization.
 
 In this work, we introduce DynoMP, a dynamic mixed precision method that adjusts bit-width at runtime based on optimization stability. Unlike fixed heuristics, DynoMP estimates the gradient's signal-to-noise ratio to determine the minimum required precision per optimization step. We evaluate our method on diverse tasks: classical ANTs registration~\cite{Avants2020-xx}, MNIST classification~\cite{Deng2012-hh}, and VoxelMorph registration~\cite{Balakrishnan2019-rx}. We demonstrate that DynoMP maintains baseline accuracy while unlocking the efficiency of lower-precision formats. Our key contributions are: (1) a theoretical framework for estimating minimum precision requirements; (2) a practical dynamic precision control implementation for classical and DL pipelines; and (3) empirical validation demonstrating resource-efficient medical image computing.
 
