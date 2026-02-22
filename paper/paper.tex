@@ -64,13 +64,13 @@
 %
 \begin{abstract}
 	Gradient-based optimization in medical image analysis is computationally intensive, typically relying on fixed high-precision formats (float64 or float32) despite the potential for acceleration via mixed precision. However, current mixed precision methods often require expensive static analysis or fail to adapt dynamically to specific datasets and pipeline execution phases.
-																																																																		
+																																																																						
 	We introduce DynoMP, a Dynamic Mixed Precision optimization approach that estimates and adjusts the minimum required bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP on both the classical ANTs registration pipeline (using the CoRR BMB\_1 dataset) and DL model training, including MNIST, VoxelMorph 2D, and VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate that DynoMP can significantly reduce precision compared to default float64 or float32 baselines by adapting to the problem at runtime, all while maintaining the accuracy of the baseline method. This dynamic approach offers a promising pathway for achieving resource-efficient and high-performance medical image computing.
-																																																																													
+																																																																																	
 	Code is available at \url{https://anonymous.4open.science/r/DynoMP-83F2}.
-																																																																													
+																																																																																	
 	\keywords{Mixed Precision \and Image Registration \and Deep Learning.}
-																																																																												
+																																																																																
 \end{abstract}
 %
 %
@@ -122,55 +122,65 @@ We trained the VoxelMorph 2D and 3D models using the Neurite OASIS dataset~\cite
 
 \subsection{Mixed Precision Implementation}
 Due to an ITK casting bug restricting ANTs to FP64~\cite{Dugre2025-fs}, we employed VPREC to simulate reduced virtual precisions based on our $p_{min}$ estimate. We limit the selection of virtual precisions to FP16, BF16, FP24, FP32, and FP64 for practical relevance. For PyTorch models on H100 GPUs, we dynamically cast the model and data during execution to the nearest supported format (FP16, BF16, FP32). We tracked theoretical FP24 requirements but fell back to FP32 given hardware constraints. TF32 was excluded as its mantissa width matches FP16. We summarize the precision formats and their characteristics in Table~\ref{tab:precisions}.
-\begin{table}[h]
+\begin{table}[b!]
 	\centering
 	\caption{Data Formats Evaluation Summary: X indicates inclusion in $\mathcal{P}$.}
 	\label{tab:precisions}
 	\begin{tabular}{lcccccc}
-		\hline
+		\toprule
 		                    & BF16 & FP16 & TF32 & FP24 & FP32 & FP64 \\
-		\hline
+		\midrule
 		\textbf{ANTs (ITK)} & -    & X    & -    & X    & X    & X    \\
 		\textbf{PyTorch}    & X    & X    & -    & -    & X    & -    \\
+		\bottomrule
 	\end{tabular}
 \end{table}
 
 \section{Results}
 Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ from our model across iterations. Our results show the required precision for the SyN stage remains below the FP24 threshold, while the rigid and affine stages could leverage FP32 or even FP24 for most iterations (47\%). For the rigid and affine stages, we observe a general increase in required precision across iterations within a resolution level.
-\begin{figure*}[htb!]
+\begin{figure*}[b!]
 	\centering
 	\includegraphics[width=\textwidth]{figures/pmin_std_bounds.png}
 	\caption{ANTs Registration: Estimated $p_{min}$ across iterations for the rigid, affine, and SyN stages at each multi-resolution level. The shaded areas represent the standard deviation across subjects ($N=50$). The horizontal dashed lines indicate the precision thresholds for BF16, FP16 FP24, FP32, and FP64.}
 	\label{fig:ants-pmin}
 \end{figure*}
 
-\MD{TODO: rework this paragraph based on the stat test we end up choosing.}
-We assessed the non-inferiority of our method compared to the FP64 baseline using a one-tailed T-test ($\alpha = 0.05$), testing whether the relative loss difference exceeded a tolerance of $5 \times 10^4$. The test was applied to the final output of each stage, with Bonferroni correction for multiple comparisons. The null hypothesis was not rejected for any stage or level (Table~\ref{tab:ants-ttest}), confirming that DynoMP maintains accuracy comparable to the FP64 baseline. Figure~\ref{fig:ants-loss} depicts the distribution of relative loss differences across stages and levels.
-\begin{table}[htb!]
+To evaluate whether our proposed DynoMP method degraded registration accuracy, we compared the relative loss differences against the FP64 baseline across all multi-resolution stages using a one-tailed t-test. As detailed in Table~\ref{tab:ants-stats}, the mixed-precision implementation yielded no statistically significant degradation in any of the tested stage-level pairs ($p > 0.05$, Bonferroni corrected). Furthermore, simultaneous confidence intervals confirmed that the relative difference in loss was strictly bounded near zero, demonstrating that the new method performs on par with the baseline without practically meaningful divergence. Figure~\ref{fig:ants-loss} depicts the distribution of relative loss differences across stages and levels.
+\begin{table}[b!]
 	\centering
-	\caption{Corrected p-values by Registration Stage and Level}
-	\begin{tabular}{lcccc}
-		\hline
-		\textbf{Stage}  & \textbf{Level 0}  & \textbf{Level 1}  & \textbf{Level 2}  & \textbf{Level 3}  \\
-		\hline
-		\textbf{Rigid}  & 1.00e+00          & 1.89e-01          & 2.25e-01          & \textbf{4.07e-02} \\
-		\textbf{Affine} & 1.00e+00          & 1.00e+00          & \textbf{2.26e-03} & \textbf{3.39e-05} \\
-		\textbf{SyN}    & \textbf{3.21e-19} & \textbf{2.12e-08} & \textbf{1.80e-05} & \textbf{9.67e-08} \\
-		\hline
-		\multicolumn{5}{l}{\small \textit{Bold values indicate statistical significance.}}
+	\caption{Relative loss differences between DynoMP and the FP64 baseline across all registration stages: rigid (R), affine (A), and SyN (S). Tests evaluated degradation  ($\alpha=0.05$, Bonferroni corrected for 12 simultaneous tests). All confidence intervals encompass zero, indicating performance on par with the baseline.}
+	\label{tab:ants-stats}
+	\begin{tabular}{lcccl}
+		\toprule
+		\textbf{Pair} & \textbf{Mean Rel Diff} & \textbf{Corr. $p$-val} & \textbf{99.58\% CI (Corrected)}                  & \textbf{Status}    \\
+		\midrule
+		R0            & $-1.16 \times 10^{-3}$ & $1.0000$               & $[-1.11 \times 10^{-2}, \; 8.82 \times 10^{-3}]$ & On Par (Not Worse) \\
+		R1            & $-1.68 \times 10^{-3}$ & $1.0000$               & $[-4.64 \times 10^{-3}, \; 1.28 \times 10^{-3}]$ & On Par (Not Worse) \\
+		R2            & $-8.95 \times 10^{-4}$ & $1.0000$               & $[-2.86 \times 10^{-3}, \; 1.07 \times 10^{-3}]$ & On Par (Not Worse) \\
+		R3            & $-1.10 \times 10^{-4}$ & $1.0000$               & $[-7.58 \times 10^{-4}, \; 5.38 \times 10^{-4}]$ & On Par (Not Worse) \\
+		A0            & $3.50 \times 10^{-4}$  & $0.8211$               & $[-3.46 \times 10^{-4}, \; 1.05 \times 10^{-3}]$ & On Par (Not Worse) \\
+		A1            & $3.81 \times 10^{-4}$  & $0.9705$               & $[-4.25 \times 10^{-4}, \; 1.19 \times 10^{-3}]$ & On Par (Not Worse) \\
+		A2            & $1.01 \times 10^{-4}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 4.15 \times 10^{-4}]$ & On Par (Not Worse) \\
+		A3            & $5.17 \times 10^{-5}$  & $1.0000$               & $[-2.13 \times 10^{-4}, \; 3.16 \times 10^{-4}]$ & On Par (Not Worse) \\
+		S0            & $-2.06 \times 10^{-5}$ & $1.0000$               & $[-1.25 \times 10^{-4}, \; 8.34 \times 10^{-5}]$ & On Par (Not Worse) \\
+		S1            & $-3.93 \times 10^{-5}$ & $1.0000$               & $[-2.65 \times 10^{-4}, \; 1.87 \times 10^{-4}]$ & On Par (Not Worse) \\
+		S2            & $6.16 \times 10^{-5}$  & $1.0000$               & $[-1.88 \times 10^{-4}, \; 3.11 \times 10^{-4}]$ & On Par (Not Worse) \\
+		S3            & $7.10 \times 10^{-6}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 2.27 \times 10^{-4}]$ & On Par (Not Worse) \\
+		\bottomrule
 	\end{tabular}
 \end{table}
-\begin{figure}[htb!]
+\begin{figure}[b!]
 	\centering
 	\includegraphics[width=\textwidth]{figures/rel_diff_fp64_dynomp.png}
 	\caption{ANTs Registration: Relative accuracy difference between our DynoMP method and the FP64 baseline at the final iteration. Lower values indicate better performance for our method. Outliers are indicated in red.}
 	\label{fig:ants-loss}
 \end{figure}
 
+
 Figure~\ref{fig:pytorch-pmin} shows the estimated $p_{min}$ across iterations for the Pytorch models. For MNIST, our model estimate a $p_{min}$ of FP16 for the early iteration, but it quickly increases to FP32 and remains for the rest of the training. If FP24 hardware were available, it could be leveraged for a majority (64\%) of the training. As with the ANTs registration, we observe a general increase in required precision across iterations.
 
 VoxelMorph 2D and 3D models require FP24 precision in the vast majority of iteration; only a limited number ($<10$) of the initial batches require FP16 precision. However, due to the lack of FP24 hardware support on H100 GPUs, we used FP32 instead. BF16 and AMP strategies training diverges after a few batches. We omit the results for FP16, as the gradient vanished, preventing estimation of $p_{min}$. Again, we observe a general increase in required precision across iterations, although plateauing after the first 2,000 batches.
-\begin{figure*}[htb!]
+\begin{figure*}[b!]
 	\centering
 	\begin{subfigure}{0.32\textwidth}
 		\includegraphics[width=\textwidth]{figures/mnist_pmin_moving_avg.pdf}
@@ -192,7 +202,7 @@ VoxelMorph 2D and 3D models require FP24 precision in the vast majority of itera
 	\caption{Estimated $p_{min}$ across batches for the PyTorch models. The horizontal dashed lines indicate the precision thresholds for BF16, FP16, FP24, and FP32; the color of the data points indicates the data format used at runtime.}
 	\label{fig:pytorch-pmin}
 \end{figure*}
-\begin{figure*}[htb!]
+\begin{figure*}[b!]
 	\centering
 	\begin{subfigure}{0.32\textwidth}
 		\includegraphics[width=\textwidth]{figures/mnist_loss.pdf}
@@ -228,7 +238,6 @@ The theoretical bound proposed by Hayford et al.~\cite{Hayford2024-kb} assumes c
 
 % \subsection{Conclusion}
 In summary, DynoMP bridges theoretical optimization stability with practical mixed precision computing. By dynamically estimating the minimum required bit-width at runtime, we demonstrate that medical imaging pipelines can operate effectively below standard FP64/FP32 formats without compromising accuracy. While broad adoption is currently limited by complex software architectures and the availability of intermediate-precision hardware, DynoMP establishes a theoretical framework for advancing resource-efficient medical image computing.
-
 
 % ---- Bibliography ----
 %
