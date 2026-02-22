@@ -64,13 +64,13 @@
 %
 \begin{abstract}
 	Gradient-based optimization in medical image analysis is computationally intensive, typically relying on fixed high-precision formats (float64 or float32) despite the potential for acceleration via mixed precision. However, current mixed precision methods often require expensive static analysis or fail to adapt dynamically to specific datasets and pipeline execution phases.
-																																																																						
+																																																																							
 	We introduce DynoMP, a Dynamic Mixed Precision optimization approach that estimates and adjusts the minimum required bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP on both the classical ANTs registration pipeline (using the CoRR BMB\_1 dataset) and DL model training, including MNIST, VoxelMorph 2D, and VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate that DynoMP can significantly reduce precision compared to default float64 or float32 baselines by adapting to the problem at runtime, all while maintaining the accuracy of the baseline method. This dynamic approach offers a promising pathway for achieving resource-efficient and high-performance medical image computing.
-																																																																																	
+																																																																																		
 	Code is available at \url{https://anonymous.4open.science/r/DynoMP-83F2}.
-																																																																																	
+																																																																																		
 	\keywords{Mixed Precision \and Image Registration \and Deep Learning.}
-																																																																																
+																																																																																	
 \end{abstract}
 %
 %
@@ -152,20 +152,20 @@ To evaluate whether our proposed DynoMP method degraded registration accuracy, w
 	\label{tab:ants-stats}
 	\begin{tabular}{lcccl}
 		\toprule
-		\textbf{Pair} & \textbf{Mean Rel Diff} & \textbf{Corr. $p$-val} & \textbf{99.58\% CI (Corrected)}                  & \textbf{Status}    \\
+		\textbf{Pair} & \textbf{Mean Rel Diff} & \textbf{Corr. $p$-val} & \textbf{99.58\% CI (Corrected)}                  & \textbf{Status} \\
 		\midrule
-		R0            & $-1.16 \times 10^{-3}$ & $1.0000$               & $[-1.11 \times 10^{-2}, \; 8.82 \times 10^{-3}]$ & On Par (Not Worse) \\
-		R1            & $-1.68 \times 10^{-3}$ & $1.0000$               & $[-4.64 \times 10^{-3}, \; 1.28 \times 10^{-3}]$ & On Par (Not Worse) \\
-		R2            & $-8.95 \times 10^{-4}$ & $1.0000$               & $[-2.86 \times 10^{-3}, \; 1.07 \times 10^{-3}]$ & On Par (Not Worse) \\
-		R3            & $-1.10 \times 10^{-4}$ & $1.0000$               & $[-7.58 \times 10^{-4}, \; 5.38 \times 10^{-4}]$ & On Par (Not Worse) \\
-		A0            & $3.50 \times 10^{-4}$  & $0.8211$               & $[-3.46 \times 10^{-4}, \; 1.05 \times 10^{-3}]$ & On Par (Not Worse) \\
-		A1            & $3.81 \times 10^{-4}$  & $0.9705$               & $[-4.25 \times 10^{-4}, \; 1.19 \times 10^{-3}]$ & On Par (Not Worse) \\
-		A2            & $1.01 \times 10^{-4}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 4.15 \times 10^{-4}]$ & On Par (Not Worse) \\
-		A3            & $5.17 \times 10^{-5}$  & $1.0000$               & $[-2.13 \times 10^{-4}, \; 3.16 \times 10^{-4}]$ & On Par (Not Worse) \\
-		S0            & $-2.06 \times 10^{-5}$ & $1.0000$               & $[-1.25 \times 10^{-4}, \; 8.34 \times 10^{-5}]$ & On Par (Not Worse) \\
-		S1            & $-3.93 \times 10^{-5}$ & $1.0000$               & $[-2.65 \times 10^{-4}, \; 1.87 \times 10^{-4}]$ & On Par (Not Worse) \\
-		S2            & $6.16 \times 10^{-5}$  & $1.0000$               & $[-1.88 \times 10^{-4}, \; 3.11 \times 10^{-4}]$ & On Par (Not Worse) \\
-		S3            & $7.10 \times 10^{-6}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 2.27 \times 10^{-4}]$ & On Par (Not Worse) \\
+		R0            & $-1.16 \times 10^{-3}$ & $1.0000$               & $[-1.11 \times 10^{-2}, \; 8.82 \times 10^{-3}]$ & Equivalent      \\
+		R1            & $-1.68 \times 10^{-3}$ & $1.0000$               & $[-4.64 \times 10^{-3}, \; 1.28 \times 10^{-3}]$ & Equivalent      \\
+		R2            & $-8.95 \times 10^{-4}$ & $1.0000$               & $[-2.86 \times 10^{-3}, \; 1.07 \times 10^{-3}]$ & Equivalent      \\
+		R3            & $-1.10 \times 10^{-4}$ & $1.0000$               & $[-7.58 \times 10^{-4}, \; 5.38 \times 10^{-4}]$ & Equivalent      \\
+		A0            & $3.50 \times 10^{-4}$  & $0.8211$               & $[-3.46 \times 10^{-4}, \; 1.05 \times 10^{-3}]$ & Equivalent      \\
+		A1            & $3.81 \times 10^{-4}$  & $0.9705$               & $[-4.25 \times 10^{-4}, \; 1.19 \times 10^{-3}]$ & Equivalent      \\
+		A2            & $1.01 \times 10^{-4}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 4.15 \times 10^{-4}]$ & Equivalent      \\
+		A3            & $5.17 \times 10^{-5}$  & $1.0000$               & $[-2.13 \times 10^{-4}, \; 3.16 \times 10^{-4}]$ & Equivalent      \\
+		S0            & $-2.06 \times 10^{-5}$ & $1.0000$               & $[-1.25 \times 10^{-4}, \; 8.34 \times 10^{-5}]$ & Equivalent      \\
+		S1            & $-3.93 \times 10^{-5}$ & $1.0000$               & $[-2.65 \times 10^{-4}, \; 1.87 \times 10^{-4}]$ & Equivalent      \\
+		S2            & $6.16 \times 10^{-5}$  & $1.0000$               & $[-1.88 \times 10^{-4}, \; 3.11 \times 10^{-4}]$ & Equivalent      \\
+		S3            & $7.10 \times 10^{-6}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 2.27 \times 10^{-4}]$ & Equivalent      \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -175,7 +175,6 @@ To evaluate whether our proposed DynoMP method degraded registration accuracy, w
 	\caption{ANTs Registration: Relative accuracy difference between our DynoMP method and the FP64 baseline at the final iteration. Lower values indicate better performance for our method. Outliers are indicated in red.}
 	\label{fig:ants-loss}
 \end{figure}
-
 
 Figure~\ref{fig:pytorch-pmin} shows the estimated $p_{min}$ across iterations for the Pytorch models. For MNIST, our model estimate a $p_{min}$ of FP16 for the early iteration, but it quickly increases to FP32 and remains for the rest of the training. If FP24 hardware were available, it could be leveraged for a majority (64\%) of the training. As with the ANTs registration, we observe a general increase in required precision across iterations.
 
