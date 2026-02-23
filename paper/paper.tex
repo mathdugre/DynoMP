@@ -79,11 +79,11 @@
 	maintaining the accuracy of the baseline method. This dynamic approach
 	offers a promising pathway for achieving resource-efficient and
 	high-performance medical image computing.
-																																																																																		
+																																																																																					
 	Code is available at \url{https://anonymous.4open.science/r/DynoMP-83F2}.
-																																																																																		
+																																																																																					
 	\keywords{Mixed Precision \and Image Registration \and Deep Learning.}
-																																																																																	
+																																																																																				
 \end{abstract}
 %
 %
@@ -113,9 +113,8 @@ In this work, we introduce DynoMP, a dynamic mixed precision method that adjusts
 \section{Method}
 \subsection{Minimum Precision Estimation}
 Hayford et al.~\cite{Hayford2024-kb} proposed a theoretical framework linking
-convergence stability of gradient-based optimization with its data precision $p$
-and gradient loss $\nabla\mathcal{L}$, assuming that $\mathcal{L}$
-is Lipschitz-continuous with constant $K$ \TG{add any other assumption on $\mathcal{L}$ here}. We adapt their Theorem~1 to estimate
+convergence stability of gradient-based optimization with its data precision $p$, parameters $\theta$,
+and gradient loss $\nabla\mathcal{L}$, assuming that $\mathcal{L}$ is convex and $\nabla \mathcal{L}$ is Lipschitz continuous with constant $K$ such that $K < 1/\eta$. We adapt their Theorem~1 to estimate
 the minimum precision ($p_{min}$) required to ensure the gradient signal exceeds
 the noise inherent to a given data format:
 \begin{equation}
@@ -250,24 +249,24 @@ practically meaningful divergence. Figure~\ref{fig:ants-loss} depicts the
 distribution of relative loss differences across stages and levels.
 \begin{table}[b!]
 	\centering
-	\caption{Relative loss differences between DynoMP and the FP64 baseline across all registration stages: rigid (R), affine (A), and SyN (S). Tests evaluated degradation  ($\alpha=0.05$, Bonferroni corrected for 12 simultaneous tests). All confidence intervals encompass zero, indicating performance on par with the baseline. \TG{not sure what the ``status'' column means, if you meant to denote the result of the test I would just remove it}}
+	\caption{Relative loss differences between DynoMP and the FP64 baseline across all registration stages: rigid (R), affine (A), and SyN (S). Tests evaluated degradation  ($\alpha=0.05$, Bonferroni corrected for 12 simultaneous tests). All confidence intervals encompass zero, indicating performance on par with the baseline.}
 	\label{tab:ants-stats}
 	\begin{tabular}{lcccl}
 		\toprule
-		\textbf{Pair} & \textbf{Mean Rel Diff} & \textbf{Corr. $p$-val} & \textbf{99.58\% CI (Corrected)}                  & \textbf{Status} \\
+		\textbf{Pair} & \textbf{Mean Rel Diff} & \textbf{Corr. $p$-val} & \textbf{99.58\% CI (Corrected)}                  \\
 		\midrule
-		R0            & $-1.16 \times 10^{-3}$ & $1.0000$               & $[-1.11 \times 10^{-2}, \; 8.82 \times 10^{-3}]$ & Equivalent      \\
-		R1            & $-1.68 \times 10^{-3}$ & $1.0000$               & $[-4.64 \times 10^{-3}, \; 1.28 \times 10^{-3}]$ & Equivalent      \\
-		R2            & $-8.95 \times 10^{-4}$ & $1.0000$               & $[-2.86 \times 10^{-3}, \; 1.07 \times 10^{-3}]$ & Equivalent      \\
-		R3            & $-1.10 \times 10^{-4}$ & $1.0000$               & $[-7.58 \times 10^{-4}, \; 5.38 \times 10^{-4}]$ & Equivalent      \\
-		A0            & $3.50 \times 10^{-4}$  & $0.8211$               & $[-3.46 \times 10^{-4}, \; 1.05 \times 10^{-3}]$ & Equivalent      \\
-		A1            & $3.81 \times 10^{-4}$  & $0.9705$               & $[-4.25 \times 10^{-4}, \; 1.19 \times 10^{-3}]$ & Equivalent      \\
-		A2            & $1.01 \times 10^{-4}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 4.15 \times 10^{-4}]$ & Equivalent      \\
-		A3            & $5.17 \times 10^{-5}$  & $1.0000$               & $[-2.13 \times 10^{-4}, \; 3.16 \times 10^{-4}]$ & Equivalent      \\
-		S0            & $-2.06 \times 10^{-5}$ & $1.0000$               & $[-1.25 \times 10^{-4}, \; 8.34 \times 10^{-5}]$ & Equivalent      \\
-		S1            & $-3.93 \times 10^{-5}$ & $1.0000$               & $[-2.65 \times 10^{-4}, \; 1.87 \times 10^{-4}]$ & Equivalent      \\
-		S2            & $6.16 \times 10^{-5}$  & $1.0000$               & $[-1.88 \times 10^{-4}, \; 3.11 \times 10^{-4}]$ & Equivalent      \\
-		S3            & $7.10 \times 10^{-6}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 2.27 \times 10^{-4}]$ & Equivalent      \\
+		R0            & $-1.16 \times 10^{-3}$ & $1.0000$               & $[-1.11 \times 10^{-2}, \; 8.82 \times 10^{-3}]$ \\
+		R1            & $-1.68 \times 10^{-3}$ & $1.0000$               & $[-4.64 \times 10^{-3}, \; 1.28 \times 10^{-3}]$ \\
+		R2            & $-8.95 \times 10^{-4}$ & $1.0000$               & $[-2.86 \times 10^{-3}, \; 1.07 \times 10^{-3}]$ \\
+		R3            & $-1.10 \times 10^{-4}$ & $1.0000$               & $[-7.58 \times 10^{-4}, \; 5.38 \times 10^{-4}]$ \\
+		A0            & $3.50 \times 10^{-4}$  & $0.8211$               & $[-3.46 \times 10^{-4}, \; 1.05 \times 10^{-3}]$ \\
+		A1            & $3.81 \times 10^{-4}$  & $0.9705$               & $[-4.25 \times 10^{-4}, \; 1.19 \times 10^{-3}]$ \\
+		A2            & $1.01 \times 10^{-4}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 4.15 \times 10^{-4}]$ \\
+		A3            & $5.17 \times 10^{-5}$  & $1.0000$               & $[-2.13 \times 10^{-4}, \; 3.16 \times 10^{-4}]$ \\
+		S0            & $-2.06 \times 10^{-5}$ & $1.0000$               & $[-1.25 \times 10^{-4}, \; 8.34 \times 10^{-5}]$ \\
+		S1            & $-3.93 \times 10^{-5}$ & $1.0000$               & $[-2.65 \times 10^{-4}, \; 1.87 \times 10^{-4}]$ \\
+		S2            & $6.16 \times 10^{-5}$  & $1.0000$               & $[-1.88 \times 10^{-4}, \; 3.11 \times 10^{-4}]$ \\
+		S3            & $7.10 \times 10^{-6}$  & $1.0000$               & $[-2.12 \times 10^{-4}, \; 2.27 \times 10^{-4}]$ \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -293,7 +292,7 @@ batches. We omit the results for FP16, as the gradient vanished, preventing
 estimation of $p_{min}$. Again, we observe a general increase in required
 precision across iterations, although plateauing after the first 2,000 batches.
 \TG{The conclusions could be clarified here. I think you could just say that
-your results demonstrate that while BF16 won't work for voxelmorph, FP24 would
+	your results demonstrate that while BF16 won't work for voxelmorph, FP24 would
 be sufficient, which would motivate its hardware support for this application.}
 \begin{figure*}[b!]
 	\centering
@@ -344,7 +343,7 @@ be sufficient, which would motivate its hardware support for this application.}
 % \subsection{The Need for Intermediate Precision}
 Our analysis indicates a misalignment between current hardware capabilities and
 the numerical requirements of medical image analysis tasks \TG{rephrase as an
-opportunity: your analysis indicates that implementing FP24 would be highly
+	opportunity: your analysis indicates that implementing FP24 would be highly
 beneficial for voxelmorph DL models}. In both classical registration (ANTs) and DL models
 (VoxelMorph), our theoretical model frequently identified FP24 as a sufficient
 precision level. Standard FP16 and BF16 often led to divergence or significant
@@ -363,7 +362,7 @@ Addressing this limitation requires refactoring the library's core templated arc
 
 % \subsection{Theoretical Applicability}
 The theoretical bound proposed by Hayford et al.~\cite{Hayford2024-kb} assumes
-conditions such as \TG{avoid ``such as'' in this context: just be exhaustive and accurate about assumptions} loss convexity and Lipschitz continuity. In complex tasks
+loss convexity and Lipschitz continuity with $K<1/\eta$. In complex tasks
 like deformable image registration, these assumptions may not strictly hold.
 Additionally, validation in medical image registration often relies on
 high-precision (FP64) baselines rather than ground truth, as the problem is
