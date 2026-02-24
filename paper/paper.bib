@@ -1,23 +1,19 @@
 @article{Avants2008-ea,
-  title        = {{Symmetric diffeomorphic image registration with
-                  cross-correlation: evaluating automated labeling of elderly
-                  and neurodegenerative brain}},
-  author       = {Avants, B B and Epstein, C L and Grossman, M and Gee, J C},
-  journaltitle = {Medical Image Analysis},
-  publisher    = {Elsevier BV},
-  volume       = {12},
-  issue        = {1},
-  pages        = {26--41},
-  date         = {2008-02},
-  doi          = {10.1016/j.media.2007.06.004},
-  pmc          = {PMC2276735},
-  pmid         = {17659998},
-  issn         = {1361-8415,1361-8423},
-  url          = {https://www.sciencedirect.com/science/article/pii/S1361841507000606?casa_token=1xlXL1sFpqkAAAAA:oJV2Af5d27ngBXsi5kvfKzi5h3QRzg6ytilvdhFhQRILGDnMosh_hI86G22-raDZm3Z1zAZtdg},
-  language     = {en}
+  title    = {Symmetric diffeomorphic image registration with cross-correlation: Evaluating automated labeling of elderly and neurodegenerative brain},
+  journal  = {Medical Image Analysis},
+  volume   = {12},
+  number   = {1},
+  pages    = {26-41},
+  year     = {2008},
+  note     = {Special Issue on The Third International Workshop on Biomedical Image Registration -- WBIR 2006},
+  issn     = {1361-8415},
+  doi      = {https://doi.org/10.1016/j.media.2007.06.004},
+  author   = {B.B. Avants and C.L. Epstein and M. Grossman and J.C. Gee},
+  keywords = {Diffeomorphic, Deformable image registration, Human cortex, Dementia, Morphometry, Cross-correlation},
+  abstract = {One of the most challenging problems in modern neuroimaging is detailed characterization of neurodegeneration. Quantifying spatial and longitudinal atrophy patterns is an important component of this process. These spatiotemporal signals will aid in discriminating between related diseases, such as frontotemporal dementia (FTD) and Alzheimer’s disease (AD), which manifest themselves in the same at-risk population. Here, we develop a novel symmetric image normalization method (SyN) for maximizing the cross-correlation within the space of diffeomorphic maps and provide the Euler–Lagrange equations necessary for this optimization. We then turn to a careful evaluation of our method. Our evaluation uses gold standard, human cortical segmentation to contrast SyN’s performance with a related elastic method and with the standard ITK implementation of Thirion’s Demons algorithm. The new method compares favorably with both approaches, in particular when the distance between the template brain and the target brain is large. We then report the correlation of volumes gained by algorithmic cortical labelings of FTD and control subjects with those gained by the manual rater. This comparison shows that, of the three methods tested, SyN’s volume measurements are the most strongly correlated with volume measurements gained by expert labeling. This study indicates that SyN, with cross-correlation, is a reliable method for normalizing and making anatomical measurements in volumetric MRI of patients and at-risk elderly individuals.}
 }
 
-@software{Avants2020-xx,
+@misc{Avants2020-xx,
   type      = {software},
   title     = {{Advanced normalization tools (ANTs)}},
   author    = {Avants, B and Tustison, N and Johnson, Hans J},
@@ -26,22 +22,17 @@
 }
 
 @article{Balakrishnan2019-rx,
-  title        = {{VoxelMorph: A learning framework for deformable medical image
-                  registration}},
-  author       = {Balakrishnan, Guha and Zhao, Amy and Sabuncu, Mert R and
-                  Guttag, John and Dalca, Adrian V},
-  journaltitle = {IEEE transactions on medical imaging},
-  publisher    = {Institute of Electrical and Electronics Engineers (IEEE)},
-  volume       = {38},
-  issue        = {8},
-  pages        = {1788--1800},
-  date         = {2019-02-04},
-  doi          = {10.1109/TMI.2019.2897538},
-  pmid         = {30716034},
-  issn         = {0278-0062,1558-254X},
-  url          = {https://doi.org/10.1109/tmi.2019.2897538},
-  language     = {en}
+  author   = {Balakrishnan, Guha and Zhao, Amy and Sabuncu, Mert R. and Guttag, John and Dalca, Adrian V.},
+  journal  = {IEEE Transactions on Medical Imaging},
+  title    = {VoxelMorph: A Learning Framework for Deformable Medical Image Registration},
+  year     = {2019},
+  volume   = {38},
+  number   = {8},
+  pages    = {1788-1800},
+  keywords = {Strain;Training;Biomedical imaging;Image segmentation;Optimization;Image registration;Three-dimensional displays;Registration;machine learning;convolutional neural networks},
+  doi      = {10.1109/TMI.2019.2897538}
 }
+
 
 @article{Billot2023-vp,
   title        = {{SynthSeg: Segmentation of brain MRI scans of any contrast and
@@ -57,114 +48,105 @@
   pmc          = {PMC10154424},
   pmid         = {36857946},
   issn         = {1361-8415,1361-8423},
-  url          = {http://dx.doi.org/10.1016/j.media.2023.102789},
   language     = {en}
 }
 
 @inproceedings{Chatelain2019-vw,
-  title     = {{Automatic Exploration of Reduced Floating-Point Representations
-               in Iterative Methods}},
-  author    = {Chatelain, Yohan and Petit, Eric and de Oliveira Castro, Pablo
-               and Lartigue, Ghislain and Defour, David},
-  booktitle = {{Euro-Par 2019: Parallel Processing}},
+  author    = {Chatelain, Yohan
+               and Petit, Eric
+               and de Oliveira Castro, Pablo
+               and Lartigue, Ghislain
+               and Defour, David},
+  editor    = {Yahyapour, Ramin},
+  title     = {Automatic Exploration of Reduced Floating-Point Representations in Iterative Methods},
+  booktitle = {Euro-Par 2019: Parallel Processing},
+  year      = {2019},
   publisher = {Springer International Publishing},
+  address   = {Cham},
   pages     = {481--494},
-  date      = {2019},
-  doi       = {10.1007/978-3-030-29400-7_34},
-  url       = {http://dx.doi.org/10.1007/978-3-030-29400-7_34}
+  abstract  = {With the ever-increasing need for computation of scientific applications, new application domains, and major energy constraints, the landscape of floating-point computation is changing. New floating-point representation formats are emerging and there is a need for tools to simulate their impact in legacy codes. In this paper, we propose an automatic tool to evaluate the effect of adapting the floating point precision for each operation over time, which is particularly useful in iterative schemes. We present a backend to emulate any IEEE-754 floating-point operation in lower precision. We tested the numerical errors resilience of our solutions thanks to Monte Carlo Arithmetic and demonstrated the effectiveness of this methodology on YALES2, a large Combustion-CFD HPC code, by achieving 28{\%} to 67{\%} reduction in communication volume by lowering precision.},
+  isbn      = {978-3-030-29400-7}
 }
+
+
 
 @article{Deng2012-hh,
-  title        = {{The MNIST database of handwritten digit images for machine
-                  learning research [best of the web]}},
-  author       = {Deng, Li},
-  journaltitle = {IEEE Signal Processing Magazine},
-  publisher    = {Institute of Electrical and Electronics Engineers (IEEE)},
-  volume       = {29},
-  issue        = {6},
-  pages        = {141--142},
-  date         = {2012-11},
-  doi          = {10.1109/msp.2012.2211477},
-  issn         = {1053-5888,1558-0792},
-  url          = {http://dx.doi.org/10.1109/MSP.2012.2211477},
-  urldate      = {2026-02-12},
-  language     = {en}
+  author   = {Deng, Li},
+  journal  = {IEEE Signal Processing Magazine},
+  title    = {The MNIST Database of Handwritten Digit Images for Machine Learning Research [Best of the Web]},
+  year     = {2012},
+  volume   = {29},
+  number   = {6},
+  pages    = {141-142},
+  keywords = {Machine learning},
+  doi      = {10.1109/MSP.2012.2211477}
 }
 
-@article{Denis2015-zf,
-  title        = {{Verificarlo: checking floating point accuracy through Monte
-                  Carlo Arithmetic}},
-  author       = {Denis, Christophe and De Oliveira Castro, Pablo and Petit,
-                  Eric},
-  journaltitle = {arXiv [cs.MS]},
-  date         = {2015-09-04},
-  eprint       = {1509.01347},
-  eprinttype   = {arXiv},
-  eprintclass  = {cs.MS},
-  url          = {http://arxiv.org/abs/1509.01347}
+
+@misc{Denis2015-zf,
+  title         = {Verificarlo: checking floating point accuracy through Monte Carlo Arithmetic},
+  author        = {Christophe Denis and Pablo De Oliveira Castro and Eric Petit},
+  year          = {2018},
+  eprint        = {1509.01347},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.MS},
+  doi           = {10.48550/arXiv.1509.01347}
 }
 
 @article{Dugre2025-fs,
-  title        = {{An analysis of performance bottlenecks in MRI preprocessing}},
-  author       = {Dugré, Mathieu and Chatelain, Yohan and Glatard, Tristan},
-  journaltitle = {GigaScience},
-  volume       = {24},
-  pages        = {giae098},
-  date         = {2025-03-03},
-  doi          = {10.1093/gigascience/giae098},
-  url          = {http://dx.doi.org/10.1093/gigascience/giae098}
+  author   = {Dugr\'e, Mathieu and Chatelain, Yohan and Glatard, Tristan},
+  title    = {An analysis of performance bottlenecks in MRI preprocessing},
+  journal  = {GigaScience},
+  volume   = {14},
+  pages    = {giae098},
+  year     = {2025},
+  month    = {03},
+  abstract = {Magnetic resonance imaging (MRI) preprocessing is a critical step for neuroimaging analysis. However, the computational cost of MRI preprocessing pipelines is a major bottleneck for large cohort studies and some clinical applications. While high-performance computing and, more recently, deep learning have been adopted to accelerate the computations, these techniques require costly hardware and are not accessible to all researchers. Therefore, it is important to understand the performance bottlenecks of MRI preprocessing pipelines to improve their performance. Using the Intel VTune profiler, we characterized the bottlenecks of several commonly used MRI preprocessing pipelines from the Advanced Normalization Tools (ANTs), FMRIB Software Library, and FreeSurfer toolboxes. We found few functions contributed to most of the CPU time and that linear interpolation was the largest contributor. Data access was also a substantial bottleneck. We identified a bug in the Insight Segmentation and Registration Toolkit library that impacts the performance of the ANTs pipeline in single precision and a potential issue with the OpenMP scaling in FreeSurfer recon-all. Our results provide a reference for future efforts to optimize MRI preprocessing pipelines.},
+  issn     = {2047-217X},
+  doi      = {10.1093/gigascience/giae098},
+  eprint   = {https://academic.oup.com/gigascience/article-pdf/doi/10.1093/gigascience/giae098/62337828/giae098.pdf}
 }
 
-@article{Fu2021-yl,
-  title        = {{CPT: Efficient deep neural network training via cyclic
-                  precision}},
-  author       = {Fu, Yonggan and Guo, Han and Li, Meng and Yang, Xin and Ding,
-                  Yining and Chandra, Vikas and Lin, Yingyan Celine},
-  journaltitle = {arXiv [cs.LG]},
-  date         = {2021-01-24},
-  eprint       = {2101.09868},
-  eprinttype   = {arXiv},
-  eprintclass  = {cs.LG},
-  doi          = {10.48550/arXiv.2101.09868},
-  url          = {http://arxiv.org/abs/2101.09868},
-  urldate      = {2026-02-24}
+
+
+
+
+@misc{Fu2021-yl,
+  title         = {CPT: Efficient Deep Neural Network Training via Cyclic Precision},
+  author        = {Yonggan Fu and Han Guo and Meng Li and Xin Yang and Yining Ding and Vikas Chandra and Yingyan Celine Lin},
+  year          = {2025},
+  eprint        = {2101.09868},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.2101.09868}
 }
 
 @article{Hayford2024-kb,
-  title        = {{Speeding up and reducing memory usage for scientific machine
-                  learning via mixed precision}},
-  author       = {Hayford, Joel and Goldman-Wetzler, Jacob and Wang, Eric and
-                  Lu, Lu},
-  journaltitle = {Computer methods in applied mechanics and engineering},
-  publisher    = {Elsevier BV},
-  volume       = {428},
-  issue        = {117093},
-  pages        = {117093},
-  date         = {2024-08},
-  doi          = {10.1016/j.cma.2024.117093},
-  issn         = {0045-7825,1879-2138},
-  url          = {https://www.sciencedirect.com/science/article/pii/S0045782524003499},
-  language     = {en}
+  title    = {Speeding up and reducing memory usage for scientific machine learning via mixed precision},
+  journal  = {Computer Methods in Applied Mechanics and Engineering},
+  volume   = {428},
+  pages    = {117093},
+  year     = {2024},
+  issn     = {0045-7825},
+  doi      = {https://doi.org/10.1016/j.cma.2024.117093},
+  author   = {Joel Hayford and Jacob Goldman-Wetzler and Eric Wang and Lu Lu},
+  keywords = {Scientific machine learning, Partial differential equations, Physics-informed neural networks, Deep operator networks, Mixed precision, Computational efficiency},
+  abstract = {Scientific machine learning (SciML) has emerged as a versatile approach to address complex computational science and engineering problems. Within this field, physics-informed neural networks (PINNs) and deep operator networks (DeepONets) stand out as the leading techniques for solving partial differential equations by incorporating both physical equations and experimental data. However, training PINNs and DeepONets require significant computational resources, including long computational times and large amounts of memory. In search of computational efficiency, training neural networks using half precision (float16) rather than the conventional single (float32) or double (float64) precision has gained substantial interest, given the inherent benefits of reduced computational time and memory consumed. However, we find that float16 cannot be applied to SciML methods, because of gradient divergence at the start of training, weight updates going to zero, and the inability to converge to a local minima. To overcome these limitations, we explore mixed precision, which is an approach that combines the float16 and float32 numerical formats to reduce memory usage and increase computational speed. Our experiments showcase that mixed precision training not only substantially decreases training times and memory demands but also maintains model accuracy. We also reinforce our empirical observations with a theoretical analysis. The research has broad implications for SciML in various computational applications.}
 }
 
 @article{Henschel2022-wa,
-  title        = {{FastSurferVINN: Building resolution-independence into deep
-                  learning segmentation methods-A solution for HighRes brain
-                  {MRI}}},
-  author       = {Henschel, Leonie and Kügler, David and Reuter, Martin},
-  journaltitle = {NeuroImage},
-  publisher    = {Elsevier BV},
-  volume       = {251},
-  issue        = {118933},
-  pages        = {118933},
-  date         = {2022-05-01},
-  doi          = {10.1016/j.neuroimage.2022.118933},
-  pmc          = {PMC9801435},
-  pmid         = {35122967},
-  issn         = {1053-8119,1095-9572},
-  url          = {https://www.sciencedirect.com/science/article/pii/S1053811922000623},
-  language     = {en}
+  title    = {FastSurferVINN: Building resolution-independence into deep learning segmentation methods--A solution for HighRes brain MRI},
+  journal  = {NeuroImage},
+  volume   = {251},
+  pages    = {118933},
+  year     = {2022},
+  issn     = {1053-8119},
+  doi      = {https://doi.org/10.1016/j.neuroimage.2022.118933},
+  author   = {Leonie Henschel and David K\"ugler and Martin Reuter},
+  keywords = {Computational neuroimaging, Deep learning, Structural MRI, Artificial intelligence, High-resolution},
+  abstract = {Leading neuroimaging studies have pushed 3T MRI acquisition resolutions below 1.0 mm for improved structure definition and morphometry. Yet, only few, time-intensive automated image analysis pipelines have been validated for high-resolution (HiRes) settings. Efficient deep learning approaches, on the other hand, rarely support more than one fixed resolution (usually 1.0 mm). Furthermore, the lack of a standard submillimeter resolution as well as limited availability of diverse HiRes data with sufficient coverage of scanner, age, diseases, or genetic variance poses additional, unsolved challenges for training HiRes networks. Incorporating resolution-independence into deep learning-based segmentation, i.e., the ability to segment images at their native resolution across a range of different voxel sizes, promises to overcome these challenges, yet no such approach currently exists. We now fill this gap by introducing a Voxel-size Independent Neural Network (VINN) for resolution-independent segmentation tasks and present FastSurferVINN, which (i) establishes and implements resolution-independence for deep learning as the first method simultaneously supporting 0.7–1.0 mm whole brain segmentation, (ii) significantly outperforms state-of-the-art methods across resolutions, and (iii) mitigates the data imbalance problem present in HiRes datasets. Overall, internal resolution-independence mutually benefits both HiRes and 1.0 mm MRI segmentation. With our rigorously validated FastSurferVINN we distribute a rapid tool for morphometric neuroimage analysis. The VINN architecture, furthermore, represents an efficient resolution-independent segmentation method for wider application.}
 }
+
 
 @article{Hoffmann2022-hu,
   title        = {{SynthMorph: Learning Contrast-Invariant Registration Without
@@ -180,116 +162,121 @@
   pmc          = {PMC8891043},
   pmid         = {34587005},
   issn         = {0278-0062,1558-254X},
-  url          = {http://dx.doi.org/10.1109/TMI.2021.3116879},
   language     = {en}
 }
 
-@article{Hoopes2022-is,
-  title        = {{Learning the effect of registration hyperparameters with
-                  {HyperMorph}}},
-  author       = {Hoopes, Andrew and Hoffmann, Malte and Greve, Douglas N and
-                  Fischl, Bruce and Guttag, John and Dalca, Adrian V},
-  journaltitle = {arXiv [cs.CV]},
-  date         = {2022-03-30},
-  eprint       = {2203.16680},
-  eprinttype   = {arXiv},
-  eprintclass  = {cs.CV},
-  doi          = {10.48550/arXiv.2203.16680},
-  url          = {http://dx.doi.org/10.48550/arXiv.2203.16680},
-  urldate      = {2026-02-12}
+@article{Hoopes_2022,
+  title     = {Learning the Effect of Registration Hyperparameters with HyperMorph},
+  volume    = {1},
+  issn      = {2766-905X},
+  doi       = {10.59275/j.melba.2022-74f1},
+  number    = {IPMI 2021},
+  journal   = {Machine Learning for Biomedical Imaging},
+  publisher = {Machine Learning for Biomedical Imaging},
+  author    = {Hoopes, Andrew and Hoffmann, Malte and Greve, Douglas N. and Fischl, Bruce and Guttag, John and Dalca, Adrian V.},
+  year      = {2022},
+  month     = apr,
+  pages     = {1--30}
 }
 
-@article{Isola2016-lu,
-  title        = {{Image-to-image translation with conditional adversarial
-                  networks}},
-  author       = {Isola, Phillip and Zhu, Jun-Yan and Zhou, Tinghui and Efros,
-                  Alexei A},
-  journaltitle = {arXiv [cs.CV]},
-  date         = {2016-11-21},
-  eprint       = {1611.07004},
-  eprinttype   = {arXiv},
-  eprintclass  = {cs.CV},
-  doi          = {10.48550/arXiv.1611.07004},
-  url          = {http://arxiv.org/abs/1611.07004},
-  urldate      = {2026-02-12}
+
+@misc{Isola2016-lu,
+  title         = {Image-to-Image Translation with Conditional Adversarial Networks},
+  author        = {Phillip Isola and Jun-Yan Zhu and Tinghui Zhou and Alexei A. Efros},
+  year          = {2018},
+  eprint        = {1611.07004},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CV},
+  doi           = {10.48550/arXiv.1611.07004}
 }
 
-@article{Jena2024-ud,
-  title        = {{FireANTs: Adaptive Riemannian Optimization for Multi-Scale
-                  Diffeomorphic Matching}},
-  author       = {Jena, Rohit and Chaudhari, Pratik and Gee, James C},
-  journaltitle = {arXiv [cs.CV]},
-  date         = {2024-04-01},
-  eprint       = {2404.01249},
-  eprinttype   = {arXiv},
-  eprintclass  = {cs.CV},
-  url          = {http://arxiv.org/abs/2404.01249}
+@misc{Jena2024-ud,
+  title         = {FireANTs: Adaptive Riemannian Optimization for Multi-Scale Diffeomorphic Matching},
+  author        = {Rohit Jena and Pratik Chaudhari and James C. Gee},
+  year          = {2025},
+  eprint        = {2404.01249},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CV},
+  doi           = {10.48550/arXiv.2404.01249}
 }
 
-@article{Kingma2014-uf,
-  title        = {{Adam: A method for stochastic optimization}},
-  author       = {Kingma, Diederik P and Ba, Jimmy},
-  journaltitle = {arXiv [cs.LG]},
-  date         = {2014-12-22},
-  eprint       = {1412.6980},
-  eprinttype   = {arXiv},
-  eprintclass  = {cs.LG},
-  url          = {http://arxiv.org/abs/1412.6980},
-  urldate      = {2025-04-09}
+@misc{Kingma2014-uf,
+  title         = {Adam: A Method for Stochastic Optimization},
+  author        = {Diederik P. Kingma and Jimmy Ba},
+  year          = {2017},
+  eprint        = {1412.6980},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.1412.6980}
 }
 
 @article{Marcus2007-nm,
-  title        = {{Open Access Series of Imaging Studies (OASIS):
-                  cross-sectional MRI data in young, middle aged, nondemented,
-                  and demented older adults}},
-  author       = {Marcus, Daniel S and Wang, Tracy H and Parker, Jamie and
-                  Csernansky, John G and Morris, John C and Buckner, Randy L},
-  journaltitle = {Journal of Cognitive Neuroscience},
-  publisher    = {MIT Press - Journals},
-  volume       = {19},
-  issue        = {9},
-  pages        = {1498--1507},
-  date         = {2007-09-01},
-  doi          = {10.1162/jocn.2007.19.9.1498},
-  pmid         = {17714011},
-  issn         = {0898-929X,1530-8898},
-  url          = {https://dx.doi.org/10.1162/jocn.2007.19.9.1498},
-  urldate      = {2026-02-12},
-  language     = {en}
+  author   = {Marcus, Daniel S. and Wang, Tracy H. and Parker, Jamie and Csernansky, John G. and Morris, John C. and Buckner, Randy L.},
+  title    = {Open Access Series of Imaging Studies (OASIS): Cross-sectional MRI Data in Young, Middle Aged, Nondemented, and Demented Older Adults},
+  journal  = {Journal of Cognitive Neuroscience},
+  volume   = {19},
+  number   = {9},
+  pages    = {1498-1507},
+  year     = {2007},
+  month    = {09},
+  abstract = {The Open Access Series of Imaging Studies is a series of magnetic resonance imaging data sets that is publicly available for study and analysis. The initial data set consists of a cross-sectional collection of 416 subjects aged 18 to 96 years. One hundred of the included subjects older than 60 years have been clinically diagnosed with very mild to moderate Alzheimer's disease. The subjects are all right-handed and include both men and women. For each subject, three or four individual T1-weighted magnetic resonance imaging scans obtained in single imaging sessions are included. Multiple within-session acquisitions provide extremely high contrast-to-noise ratio, making the data amenable to a wide range of analytic approaches including automated computational analysis. Additionally, a reliability data set is included containing 20 subjects without dementia imaged on a subsequent visit within 90 days of their initial session. Automated calculation of whole-brain volume and estimated total intracranial volume are presented to demonstrate use of the data for measuring differences associated with normal aging and Alzheimer's disease.},
+  issn     = {0898-929X},
+  doi      = {10.1162/jocn.2007.19.9.1498},
+  eprint   = {https://direct.mit.edu/jocn/article-pdf/19/9/1498/1936514/jocn.2007.19.9.1498.pdf}
 }
+
+
+
+
 
 @article{McCormick2014-ok,
-  title        = {{ITK: enabling reproducible research and open science}},
-  author       = {McCormick, Matthew and Liu, Xiaoxiao and Jomier, Julien and
-                  Marion, Charles and Ibanez, Luis},
-  journaltitle = {Frontiers in neuroinformatics},
-  publisher    = {Frontiers Media SA},
-  volume       = {8},
-  pages        = {13},
-  date         = {2014-02-20},
-  doi          = {10.3389/fninf.2014.00013},
-  pmc          = {PMC3929840},
-  pmid         = {24600387},
-  issn         = {1662-5196},
-  url          = {http://dx.doi.org/10.3389/fninf.2014.00013},
-  urldate      = {2025-05-27},
-  language     = {en}
+  author   = {McCormick, Matthew M. and Liu, Xiaoxiao  and Ibanez, Luis  and Jomier, Julien  and Marion, Charles },
+  title    = {ITK: enabling reproducible research and open science},
+  journal  = {Frontiers in Neuroinformatics},
+  volume   = {Volume 8 - 2014},
+  year     = {2014},
+  doi      = {10.3389/fninf.2014.00013},
+  issn     = {1662-5196},
+  abstract = {Reproducibility verification is essential to the practice of the scientific method. Researchers report their findings, which are strengthened as other independent groups in the scientific community share similar outcomes.  In the many scientific fields where software has become a fundamental tool for capturing and analyzing data, this requirement of reproducibility implies that reliable and comprehensive software platforms and tools should be made available to the scientific community. The tools will empower them and the public to verify, through practice, the reproducibility of observations that are reported in the scientific literature.<br/><br/>Medical image analysis is one of the fields in which the use of computational resources, both software and hardware, are an essential platform for performing experimental work. In this arena, the introduction of the Insight Toolkit (ITK) in 1999 has transformed the field and facilitates its progress by accelerating the rate at which algorithmic implementations are developed, tested, disseminated and improved. By building on the efficiency and quality of open source methodologies, ITK has provided the medical image community with an effective platform on which to build a daily workflow that incorporates the true scientific practices of reproducibility verification.<br/><br/>This article describes the multiple tools, methodologies, and practices that the ITK community has adopted, refined, and followed during the past decade, in order to become one of the research communities with the most modern reproducibility verification infrastructure.  For example, 207 contributors have created over 2400 unit tests that provide over 84% code line test coverage. The Insight Journal, an open publication journal associated with the toolkit, has seen over 360,000 publication downloads. The median normalized closeness centrality, a measure of knowledge flow, resulting from the distributed peer code review system was high, 0.46.}
 }
 
-@article{Mirhakimi2025-qb,
-  title        = {{Numerical uncertainty in linear registration: An experimental
-                  study}},
-  author       = {Mirhakimi, Niusha and Chatelain, Yohan and Glatard, Tristan
-                  and Poline, Jean-Baptiste},
-  journaltitle = {arXiv [q-bio.QM]},
-  pages        = {56--66},
-  date         = {2025-08-29},
-  eprint       = {2508.00781},
-  eprinttype   = {arXiv},
-  eprintclass  = {q-bio.QM},
-  doi          = {10.1007/978-3-032-06593-3_6},
-  url          = {http://dx.doi.org/10.1007/978-3-032-06593-3_6}
+@inproceedings{Mirhakimi2025-qb,
+  title     = {Numerical Uncertainty in Linear Registration: An Experimental
+               Study},
+  booktitle = {Uncertainty for Safe Utilization of Machine Learning in Medical
+               Imaging},
+  author    = {Mirhakimi, Niusha and Chatelain, Yohan and Poline, Jean-Baptiste
+               and Glatard, Tristan},
+  abstract  = {While linear registration is a critical step in MRI
+               preprocessing pipelines, its numerical uncertainty is
+               understudied. Using Monte-Carlo Arithmetic (MCA) simulations, we
+               assessed the most commonly used linear registration tools within
+               major software packages---SPM, FSL, and ANTs---across multiple
+               image similarity measures, two brain templates, and both healthy
+               control (HC, n=50) and Parkinson's Disease (PD, n=50) cohorts.
+               Our findings highlight the influence of linear registration
+               tools and similarity measures on numerical stability. Among the
+               evaluated tools and with default similarity measures, SPM
+               exhibited the highest stability. FSL and ANTs showed greater and
+               similar ranges of variability, with ANTs demonstrating
+               particular sensitivity to numerical perturbations that
+               occasionally led to registration failure. Furthermore, no
+               significant differences were observed between healthy and PD
+               cohorts, suggesting that numerical stability analyses obtained
+               with healthy subjects may generalise to clinical populations.
+               Finally, we also demonstrated how numerical uncertainty measures
+               may support automated quality control (QC) of linear
+               registration results. Overall, our experimental results
+               characterize the numerical stability of linear registration
+               experimentally and can serve as a basis for future uncertainty
+               analyses.},
+  publisher = {Springer Nature Switzerland},
+  pages     = {56--66},
+  year      = 2026
 }
+
+
+
 
 @inproceedings{Ntatsis2023-zq,
   title      = {{itk-elastix: Medical image registration in Python}},
@@ -303,44 +290,35 @@
   pages      = {101--105},
   date       = {2023-06-01},
   doi        = {10.25080/gerudo-f2bc6f59-00d},
-  issn       = {2575-9752},
-  url        = {http://dx.doi.org/10.25080/gerudo-f2bc6f59-00d},
-  urldate    = {2025-05-07}
+  issn       = {2575-9752}
 }
 
-@article{Paszke2019-vk,
-  title        = {{PyTorch: An imperative style, high-performance deep learning
-                  library}},
-  author       = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer,
-                  Adam and Bradbury, James and Chanan, Gregory and Killeen,
-                  Trevor and Lin, Zeming and Gimelshein, N and Antiga, L and
-                  Desmaison, Alban and Köpf, Andreas and Yang, E and DeVito,
-                  Zach and Raison, Martin and Tejani, Alykhan and Chilamkurthy,
-                  Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and
-                  Chintala, Soumith},
-  journaltitle = {Advances in neural information processing systems},
-  publisher    = {proceedings.neurips.cc},
-  volume       = {abs/1912.01703},
-  date         = {2019-12-03},
-  issn         = {1049-5258},
-  url          = {https://proceedings.neurips.cc/paper/2019/hash/bdbca288fee7f92f2bfa9f7012727740-Abstract.html}
+@inproceedings{Paszke2019-vk,
+  author    = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and Kopf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
+  booktitle = {Advances in Neural Information Processing Systems},
+  editor    = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d'Alch\'e-Buc and E. Fox and R. Garnett},
+  pages     = {},
+  publisher = {Curran Associates, Inc.},
+  title     = {PyTorch: An Imperative Style, High-Performance Deep Learning Library},
+  url       = {{https://proceedings.neurips.cc/paper_files/paper/2019/file/bdbca288fee7f92f2bfa9f7012727740-Paper.pdf}},
+  volume    = {32},
+  year      = {2019}
 }
 
-@article{Ronneberger2015-dn,
-  title        = {{U-Net: Convolutional Networks for Biomedical Image
-                  Segmentation}},
-  author       = {Ronneberger, Olaf and Fischer, Philipp and Brox, Thomas},
-  journaltitle = {arXiv [cs.CV]},
-  date         = {2015-05-18},
-  eprint       = {1505.04597},
-  eprinttype   = {arXiv},
-  eprintclass  = {cs.CV},
-  doi          = {10.48550/arXiv.1505.04597},
-  url          = {http://arxiv.org/abs/1505.04597},
-  urldate      = {2026-02-12}
+
+
+
+@misc{Ronneberger2015-dn,
+  title         = {U-Net: Convolutional Networks for Biomedical Image Segmentation},
+  author        = {Olaf Ronneberger and Philipp Fischer and Thomas Brox},
+  year          = {2015},
+  eprint        = {1505.04597},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CV},
+  doi           = {10.48550/arXiv.1505.04597}
 }
 
-@online{Wang2019-qe,
+@misc{Wang2019-qe,
   title     = {{BFloat16: The secret to high performance on Cloud {TPUs}}},
   author    = {Wang, Shibo and Kanwar, Pankaj},
   booktitle = {{Google Cloud Blog}},
@@ -352,91 +330,119 @@
 }
 
 @article{Yoo2002-ve,
-  title        = {{Engineering and algorithm design for an image processing Api:
-                  a technical report on ITK--the Insight Toolkit}},
-  author       = {Yoo, Terry S and Ackerman, Michael J and Lorensen, William E
-                  and Schroeder, Will and Chalana, Vikram and Aylward, Stephen
-                  and Metaxas, Dimitris and Whitaker, Ross},
-  journaltitle = {Studies in health technology and informatics},
-  volume       = {85},
-  pages        = {586--592},
-  date         = {2002},
-  pmid         = {15458157},
-  issn         = {0926-9630},
-  url          = {https://www.ncbi.nlm.nih.gov/pubmed/15458157},
-  language     = {en}
+  title    = {Engineering and algorithm design for an image processing Api: a
+              technical report on {ITK--the} Insight Toolkit},
+  author   = {Yoo, Terry S and Ackerman, Michael J and Lorensen, William E and
+              Schroeder, Will and Chalana, Vikram and Aylward, Stephen and
+              Metaxas, Dimitris and Whitaker, Ross},
+  abstract = {We present the detailed planning and execution of the Insight
+              Toolkit (ITK), an application programmers interface (API) for the
+              segmentation and registration of medical image data. This public
+              resource has been developed through the NLM Visible Human
+              Project, and is in beta test as an open-source software offering
+              under cost-free licensing. The toolkit concentrates on 3D medical
+              data segmentation and registration algorithms, multimodal and
+              multiresolution capabilities, and portable platform independent
+              support for Windows, Linux/Unix systems. This toolkit was built
+              using current practices in software engineering. Specifically, we
+              embraced the concept of generic programming during the
+              development of these tools, working extensively with C++
+              templates and the freedom and flexibility they allow. Software
+              development tools for distributed consortium-based code
+              development have been created and are also publicly available. We
+              discuss our assumptions, design decisions, and some lessons
+              learned.},
+  journal  = {Stud Health Technol Inform},
+  volume   = 85,
+  pages    = {586--592},
+  year     = 2002,
+  address  = {Netherlands},
+  language = {en}
 }
 
-@article{Zeiler2012-tn,
-  title        = {{ADADELTA: An Adaptive Learning Rate Method}},
-  author       = {Zeiler, Matthew D},
-  journaltitle = {arXiv [cs.LG]},
-  date         = {2012-12-22},
-  eprint       = {1212.5701},
-  eprinttype   = {arXiv},
-  eprintclass  = {cs.LG},
-  doi          = {10.48550/arXiv.1212.5701},
-  url          = {http://arxiv.org/abs/1212.5701},
-  urldate      = {2026-02-12}
+
+@misc{Zeiler2012-tn,
+  title         = {ADADELTA: An Adaptive Learning Rate Method},
+  author        = {Matthew D. Zeiler},
+  year          = {2012},
+  eprint        = {1212.5701},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  doi           = {10.48550/arXiv.1212.5701}
 }
 
-@inbook{Zhu2022-uw,
-  title     = {{Swin-VoxelMorph: A symmetric unsupervised learning model for
-               deformable medical image registration using swin transformer}},
-  author    = {Zhu, Yongpei and Lu, Shi},
-  booktitle = {{Lecture Notes in Computer Science}},
+@inproceedings{Zhu2022-uw,
+  author    = {Zhu, Yongpei
+               and Lu, Shi},
+  editor    = {Wang, Linwei
+               and Dou, Qi
+               and Fletcher, P. Thomas
+               and Speidel, Stefanie
+               and Li, Shuo},
+  title     = {Swin-VoxelMorph: A Symmetric Unsupervised Learning Model for Deformable Medical Image Registration Using Swin Transformer},
+  booktitle = {Medical Image Computing and Computer Assisted Intervention -- MICCAI 2022},
+  year      = {2022},
   publisher = {Springer Nature Switzerland},
-  location  = {Cham},
+  address   = {Cham},
   pages     = {78--87},
-  date      = {2022},
-  doi       = {10.1007/978-3-031-16446-0_8},
-  issn      = {0302-9743,1611-3349},
-  isbn      = {9783031164453,9783031164460},
-  series    = {Lecture notes in computer science},
-  url       = {https://doi.org/10.1007/978-3-031-16446-0_8},
-  language  = {en}
+  abstract  = {Deformable medical image registration is widely used in medical image processing with the invertible and one-to-one mapping between images. While state-of-the-art image registration methods are based on convolutional neural networks, few attempts have been made with Transformers which show impressive performance on computer vision tasks. Existing models neglect to employ attention mechanisms to handle the long-range cross-image relevance in embedding learning, limiting such approaches to identify the semantically meaningful correspondence of anatomical structures. These methods also ignore the topology preservation and invertibility of the transformation although they achieve fast image registration. In this paper, we propose a novel, symmetric unsupervised learning network Swin-VoxelMorph based on the Swin Transformer which minimizes the dissimilarity between images and estimates both forward and inverse transformations simultaneously. Specifically, we propose 3D Swin-UNet, which applies hierarchical Swin Transformer with shifted windows as the encoder to extract context features. And a symmetric Swin Transformer-based decoder with patch expanding layer is designed to perform the up-sampling operation to estimate the registration fields. Besides, our objective loss functions can guarantee substantial diffeomorphic properties of the predicted transformations. We verify our method on two datasets including ADNI and PPMI, and it achieves state-of-the-art registration accuracy while maintaining desirable diffeomorphic properties.},
+  isbn      = {978-3-031-16446-0}
 }
+
+
 
 @article{Zuo2014-ub,
-  title        = {{An open science resource for establishing reliability and
-                  reproducibility in functional connectomics}},
-  author       = {Zuo, Xi-Nian and Anderson, Jeffrey S and Bellec, Pierre and
-                  Birn, Rasmus M and Biswal, Bharat B and Blautzik, Janusch and
-                  Breitner, John C S and Buckner, Randy L and Calhoun, Vince D
-                  and Castellanos, F Xavier and Chen, Antao and Chen, Bing and
-                  Chen, Jiangtao and Chen, Xu and Colcombe, Stanley J and
-                  Courtney, William and Craddock, R Cameron and Di Martino,
-                  Adriana and Dong, Hao-Ming and Fu, Xiaolan and Gong, Qiyong
-                  and Gorgolewski, Krzysztof J and Han, Ying and He, Ye and He,
-                  Yong and Ho, Erica and Holmes, Avram and Hou, Xiao-Hui and
-                  Huckins, Jeremy and Jiang, Tianzi and Jiang, Yi and Kelley,
-                  William and Kelly, Clare and King, Margaret and LaConte,
-                  Stephen M and Lainhart, Janet E and Lei, Xu and Li, Hui-Jie
-                  and Li, Kaiming and Li, Kuncheng and Lin, Qixiang and Liu,
-                  Dongqiang and Liu, Jia and Liu, Xun and Liu, Yijun and Lu,
-                  Guangming and Lu, Jie and Luna, Beatriz and Luo, Jing and
-                  Lurie, Daniel and Mao, Ying and Margulies, Daniel S and Mayer,
-                  Andrew R and Meindl, Thomas and Meyerand, Mary E and Nan,
-                  Weizhi and Nielsen, Jared A and O'Connor, David and Paulsen,
-                  David and Prabhakaran, Vivek and Qi, Zhigang and Qiu, Jiang
-                  and Shao, Chunhong and Shehzad, Zarrar and Tang, Weijun and
-                  Villringer, Arno and Wang, Huiling and Wang, Kai and Wei,
-                  Dongtao and Wei, Gao-Xia and Weng, Xu-Chu and Wu, Xuehai and
-                  Xu, Ting and Yang, Ning and Yang, Zhi and Zang, Yu-Feng and
-                  Zhang, Lei and Zhang, Qinglin and Zhang, Zhe and Zhang,
-                  Zhiqiang and Zhao, Ke and Zhen, Zonglei and Zhou, Yuan and
-                  Zhu, Xing-Ting and Milham, Michael P},
-  journaltitle = {Scientific data},
-  publisher    = {Springer Science and Business Media LLC},
-  volume       = {1},
-  issue        = {1},
-  pages        = {140049},
-  date         = {2014-12-09},
-  doi          = {10.1038/sdata.2014.49},
-  pmc          = {PMC4421932},
-  pmid         = {25977800},
-  issn         = {2052-4463,2052-4463},
-  url          = {http://dx.doi.org/10.1038/sdata.2014.49},
-  urldate      = {2025-12-04},
-  language     = {en}
+  title    = {An open science resource for establishing reliability and
+              reproducibility in functional connectomics},
+  author   = {Zuo, Xi-Nian and Anderson, Jeffrey S and Bellec, Pierre and Birn,
+              Rasmus M and Biswal, Bharat B and Blautzik, Janusch and Breitner,
+              John C S and Buckner, Randy L and Calhoun, Vince D and
+              Castellanos, F Xavier and Chen, Antao and Chen, Bing and Chen,
+              Jiangtao and Chen, Xu and Colcombe, Stanley J and Courtney,
+              William and Craddock, R Cameron and Di Martino, Adriana and Dong,
+              Hao-Ming and Fu, Xiaolan and Gong, Qiyong and Gorgolewski,
+              Krzysztof J and Han, Ying and He, Ye and He, Yong and Ho, Erica
+              and Holmes, Avram and Hou, Xiao-Hui and Huckins, Jeremy and
+              Jiang, Tianzi and Jiang, Yi and Kelley, William and Kelly, Clare
+              and King, Margaret and LaConte, Stephen M and Lainhart, Janet E
+              and Lei, Xu and Li, Hui-Jie and Li, Kaiming and Li, Kuncheng and
+              Lin, Qixiang and Liu, Dongqiang and Liu, Jia and Liu, Xun and
+              Liu, Yijun and Lu, Guangming and Lu, Jie and Luna, Beatriz and
+              Luo, Jing and Lurie, Daniel and Mao, Ying and Margulies, Daniel S
+              and Mayer, Andrew R and Meindl, Thomas and Meyerand, Mary E and
+              Nan, Weizhi and Nielsen, Jared A and O'Connor, David and Paulsen,
+              David and Prabhakaran, Vivek and Qi, Zhigang and Qiu, Jiang and
+              Shao, Chunhong and Shehzad, Zarrar and Tang, Weijun and
+              Villringer, Arno and Wang, Huiling and Wang, Kai and Wei, Dongtao
+              and Wei, Gao-Xia and Weng, Xu-Chu and Wu, Xuehai and Xu, Ting and
+              Yang, Ning and Yang, Zhi and Zang, Yu-Feng and Zhang, Lei and
+              Zhang, Qinglin and Zhang, Zhe and Zhang, Zhiqiang and Zhao, Ke
+              and Zhen, Zonglei and Zhou, Yuan and Zhu, Xing-Ting and Milham,
+              Michael P},
+  abstract = {Efforts to identify meaningful functional imaging-based
+              biomarkers are limited by the ability to reliably characterize
+              inter-individual differences in human brain function. Although a
+              growing number of connectomics-based measures are reported to
+              have moderate to high test-retest reliability, the variability in
+              data acquisition, experimental designs, and analytic methods
+              precludes the ability to generalize results. The Consortium for
+              Reliability and Reproducibility (CoRR) is working to address this
+              challenge and establish test-retest reliability as a minimum
+              standard for methods development in functional connectomics.
+              Specifically, CoRR has aggregated 1,629 typical individuals'
+              resting state fMRI (rfMRI) data (5,093 rfMRI scans) from 18
+              international sites, and is openly sharing them via the
+              International Data-sharing Neuroimaging Initiative (INDI). To
+              allow researchers to generate various estimates of reliability
+              and reproducibility, a variety of data acquisition procedures and
+              experimental designs are included. Similarly, to enable users to
+              assess the impact of commonly encountered artifacts (for example,
+              motion) on characterizations of inter-individual variation,
+              datasets of varying quality are included.},
+  journal  = {Scientific Data},
+  volume   = 1,
+  number   = 1,
+  pages    = {140049},
+  month    = dec,
+  year     = 2014
 }
