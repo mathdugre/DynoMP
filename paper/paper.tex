@@ -71,19 +71,18 @@
 	execution phases. We introduce DynoMP, a Dynamic Mixed Precision
 	optimization approach that estimates and adjusts the minimum required
 	bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP
-	on both the classical ANTs registration pipeline (using the CoRR BMB\_1
-	dataset) and Deep-Learning model training, including MNIST, VoxelMorph 2D, and
-	VoxelMorph 3D (using the MNIST and OASIS datasets). Our results demonstrate
+	on classical ANTs registration (CoRR BMB\_1) and Deep Learning models:
+	MNIST, VoxelMorph 2D and 3D (OASIS). Our results demonstrate
 	that DynoMP can significantly reduce precision compared to default float64
 	or float32 baselines by adapting to the problem at runtime, all while
 	maintaining the accuracy of the baseline method. This dynamic approach
 	offers a promising pathway for achieving resource-efficient and
 	high-performance medical image computing.
-																																																																																					
+																																																																																																				
 	Code is available at \url{https://anonymous.4open.science/r/DynoMP-83F2}.
-																																																																																					
+																																																																																																				
 	\keywords{Mixed Precision \and Image Registration \and Deep Learning.}
-																																																																																				
+																																																																																																			
 \end{abstract}
 %
 %
@@ -121,12 +120,13 @@ the noise inherent to a given data format:
 	p > p_{min} = \log_2 \left( \frac{(4+3\sqrt{2}) K \|\theta\|}{\|\nabla\mathcal{L}(\theta)\|} \right) .
 	\label{eq:pmin}
 \end{equation}
-\TG{Add a few sentences here to give more intuition about the equation}
+Intuitively, insufficient precision allows quantization noise to dominate the gradient signal, causing optimization to stall or diverge. Equation~\ref{eq:pmin} formalizes this trade-off: highly curved loss landscapes ($K$) or large parameter magnitudes ($\|\theta\|$) amplify noise, requiring higher precision. Conversely, a strong gradient signal ($\|\nabla\mathcal{L}(\theta)\|$) reduces the precision needed for stable updates.
+
 In practice, computing the Lipschitz constant $K$ is non-trivial, so we empirically estimate it using a finite difference approach:
 \begin{equation}
 	K \approx \frac{\|\nabla\mathcal{L}(\theta_{t+1}) - \nabla\mathcal{L}(\theta_{t})\|}{\|\theta_{t+1} - \theta_{t}\|} .
 \end{equation}
-To compute the norm of $\theta$ and $\nabla\mathcal{L}(\theta)$, we flatten their values into a single vector and compute the Euclidean norm. We modified the ITK library and developed a drop-in Python function for PyTorch training to retrieve these metrics at each iteration, compute $p_{min}$, and dynamically adjust the precision of the subsequent iteration accordingly. This method allows us to adapt the precision requirements in real-time, ensuring that we maintain convergence while optimizing computational efficiency.
+We compute the Euclidean norms of flattened $\theta$ and $\nabla\mathcal{L}(\theta)$. We modified ITK and developed a PyTorch function to retrieve these metrics, compute $p_{min}$, and adjust precision dynamically per iteration. This real-time adaptation safeguards convergence while optimizing efficiency.
 
 \subsection{Dynamic Precision Control Policy}
 To prevent excessive casting overhead caused by oscillating precision
@@ -143,19 +143,7 @@ stability, while aggressively downcasting whenever the optimization landscape
 permits.
 
 \subsection{Virtual Precision Simulation}
-Validating convergence behavior across arbitrary bit-widths is challenging due
-to limited hardware support for non-standard floating-point formats. To address
-this, we use the VPREC backend from Verificarlo~\cite{Chatelain2019-vw}, which
-instruments standard floating-point operations to simulate reduced precision by
-truncating mantissa bits. This approach allows us to model numerical noise and
-stability on standard CPUs without requiring specialized hardware. To integrate
-this, we recompiled the ITK library with Verificarlo support and modified the
-ANTs registration pipeline to link against this instrumented build. We excluded
-critical metric calculations from instrumentation to prevent convergence
-failure. At each step, arithmetic operations are cast to the target virtual
-precision $p_{target}$, enabling the evaluation of DynoMP's policy across an
-extensive collection of data formats without extensive re-engineering of the
-underlying libraries.
+Validating convergence across arbitrary bit-widths is challenging due to limited hardware support. We use Verificarlo's VPREC backend~\cite{Chatelain2019-vw} to simulate reduced precision by truncating mantissa bits, modeling numerical noise on standard CPUs. We recompiled ITK with Verificarlo and linked the ANTs pipeline, excluding critical metric calculations to prevent failure. At each step, operations are cast to $p_{target}$, enabling DynoMP evaluation across diverse formats without extensive re-engineering.
 
 \section{Experiments}
 \subsection{Pipelines and Datasets}
@@ -207,8 +195,7 @@ FP32, and FP64 for practical relevance. For PyTorch models on H100 GPUs, we
 dynamically cast the model and data during execution to the nearest supported
 format (FP16, BF16, FP32). We tracked theoretical FP24 requirements but fell
 back to FP32 given hardware constraints. TF32 was excluded as its mantissa width
-matches FP16. We summarize the precision formats and their characteristics in
-Table~\ref{tab:precisions}.
+matches FP16. We summarize the precision formats selected in Table~\ref{tab:precisions}.
 \begin{table}[b!]
 	\centering
 	\caption{Data Formats Evaluation Summary: X indicates inclusion in $\mathcal{P}$.}
@@ -222,14 +209,8 @@ Table~\ref{tab:precisions}.
 		\bottomrule
 	\end{tabular}
 \end{table}
-
 \section{Results}
-Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ from our model across
-iterations. Our results show the required precision for the SyN stage remains
-below the FP24 threshold, while the rigid and affine stages require FP24 or FP32
-for most iterations (47\%). For the rigid and affine stages, we
-observe a general increase in required precision across iterations within a
-resolution level \TG{can you link this to literature on mixed precision?}.
+Figure~\ref{fig:ants-pmin} depicts the estimated $p_{min}$ across iterations for the ANTs registration pipeline. The required precision for the SyN stage consistently remains below the FP24 threshold. In contrast, the rigid and affine stages demand FP24 or FP32 for a significant portion of the iterations (47\%). Within each resolution level of the linear stages, the required precision generally increases as the optimization progresses. This behavior aligns with the findings of Fu et al.~\cite{Fu2021-yl}, who demonstrated that precision acts similarly to the learning rate: lower precision encourages exploration during the early stages of optimization, whereas higher precision ensures convergence in the later stages.
 \begin{figure*}[b!]
 	\centering
 	\includegraphics[width=\textwidth]{figures/pmin_std_bounds.png}
@@ -284,16 +265,7 @@ of the training. If FP24 hardware were available, it could be leveraged for a
 majority (64\%) of the training. As with the ANTs registration, we observe a
 general increase in required precision across iterations.
 
-VoxelMorph 2D and 3D models require FP24 precision in the vast majority of
-iterations; only a limited number ($<10$) of the initial batches require FP16
-precision. However, due to the lack of FP24 hardware support on H100 GPUs, we
-used FP32 instead. Training with BF16 and AMP strategies diverges after a few
-batches. We omit the results for FP16, as the gradient vanished, preventing
-estimation of $p_{min}$. Again, we observe a general increase in required
-precision across iterations, although plateauing after the first 2,000 batches.
-\TG{The conclusions could be clarified here. I think you could just say that
-	your results demonstrate that while BF16 won't work for voxelmorph, FP24 would
-be sufficient, which would motivate its hardware support for this application.}
+For both VoxelMorph 2D and 3D models, FP24 precision is required for the majority of batches, with FP16 sufficing for fewer than 10 initial batches. Consequently, due to the absence of native FP24 hardware support on H100 GPUs, FP32 was utilized for execution. Attempts to train using BF16 and standard Automatic Mixed Precision (AMP) strategies resulted in optimization divergence during the early stages of training. Furthermore, results for FP16 are omitted, as vanishing gradients prevented the reliable estimation of $p_{min}$. Consistent with prior observations, the required precision generally increases across iterations, eventually plateauing after approximately 2,000 batches. Ultimately, these findings demonstrate that while BF16 is insufficient for VoxelMorph training, FP24 provides adequate numerical stability, thereby underscoring the potential utility of FP24 hardware support for such applications.
 \begin{figure*}[b!]
 	\centering
 	\begin{subfigure}{0.32\textwidth}
@@ -313,7 +285,7 @@ be sufficient, which would motivate its hardware support for this application.}
 		\caption{VoxelMorph 3D}
 		\label{subfig:vm3d-pmin}
 	\end{subfigure}
-	\caption{Estimated $p_{min}$ across batches for the PyTorch models. The horizontal dashed lines indicate the precision thresholds for BF16, FP16, FP24, and FP32; the color of the data points indicates the data format used at runtime.}
+	\caption{Estimated $p_{min}$ across batches for the PyTorch models. The horizontal dashed lines indicate the precision thresholds for BF16, FP16, FP24, and FP32; the color of the data points indicates the data format used at runtime; note that FP24 is not available on H100 GPUs.}
 	\label{fig:pytorch-pmin}
 \end{figure*}
 \begin{figure*}[b!]
@@ -335,26 +307,13 @@ be sufficient, which would motivate its hardware support for this application.}
 		\caption{VoxelMorph 3D}
 		\label{subfig:vm3d-loss}
 	\end{subfigure}
-	\caption{Loss curves across training batches for the PyTorch models. The color of the data points indicates the data format used at runtime.}
+	\caption{Loss curves across training batches for the PyTorch models. The color of the data points indicates the data format used at runtime. We evaluate the following strategy: FP32 (baseline), FP16, BF16, PyTorch's AMP, and our proposed DynoMP method.}
 	\label{fig:pytorch-loss}
 \end{figure*}
 
 \section{Discussion and Conclusion}
 % \subsection{The Need for Intermediate Precision}
-Our analysis indicates a misalignment between current hardware capabilities and
-the numerical requirements of medical image analysis tasks \TG{rephrase as an
-	opportunity: your analysis indicates that implementing FP24 would be highly
-beneficial for voxelmorph DL models}. In both classical registration (ANTs) and DL models
-(VoxelMorph), our theoretical model frequently identified FP24 as a sufficient
-precision level. Standard FP16 and BF16 often led to divergence or significant
-error amplification, whereas FP32 exceeded the numerical requirements. Native
-hardware support for intermediate formats like FP24 is currently limited on
-standard CPUs and modern GPUs, often necessitating a default to FP32. By
-quantifying dynamic precision requirements, DynoMP provides empirical evidence
-for the potential utility of intermediate precision formats. Until such support
-becomes more widespread, our method offers a strategy for maximizing efficiency
-on existing architectures by utilizing lower precision formats when numerical
-stability permits.
+Our analysis highlights a significant opportunity for hardware optimization in medical image analysis: native support for intermediate precision formats like FP24. Across both classical registration (ANTs) and DL models (VoxelMorph), DynoMP frequently identified FP24 as sufficient. Standard 16-bit formats (FP16, BF16) often caused divergence or error amplification, while FP32 provided unnecessary precision. Because current CPUs and GPUs lack native FP24 support, pipelines must default to FP32. By quantifying these dynamic requirements, DynoMP provides empirical evidence for the utility of intermediate formats. Until such hardware becomes widely available, our method maximizes efficiency on existing architectures by utilizing the lowest numerically stable precision format.
 
 % \subsection{Legacy Software Constraints}
 Implementing dynamic mixed precision in existing scientific codebases highlights technical challenges. For example, previous work~\cite{Dugre2025-fs} identified a casting issue in ITK that forces interpolation operations into double precision (FP64). This behavior increases computational overhead and negates the benefits of using lower-precision inputs.
