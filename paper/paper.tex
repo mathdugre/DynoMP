@@ -72,8 +72,8 @@
 	execution phases. We introduce DynoMP, a Dynamic Mixed Precision
 	optimization approach that estimates and adjusts the minimum required
 	bit-width at runtime to maintain convergence accuracy. We evaluated DynoMP
-	on classical ANTs registration (CoRR BMB\_1) and Deep Learning models:
-	MNIST, VoxelMorph 2D and 3D (OASIS). Our results demonstrate
+	on classical ANTs registration and Deep Learning models:
+	MNIST, VoxelMorph 2D and 3D. Our results demonstrate
 	that DynoMP can significantly reduce precision compared to default float64
 	or float32 baselines by adapting to the problem at runtime, all while
 	maintaining the accuracy of the baseline method. This dynamic approach
@@ -95,14 +95,14 @@ Mixed precision computing addresses this by strategically combining high- and lo
 
 Applying reduced precision requires caution. For example, registration is an
 ill-posed optimization problem where errors can amplify across multi-resolution
-stages. Recent work~\cite{Mirhakimi2025-qb} shows that numerical uncertainty in
+stages. Recent work~\cite{Mirhakimi2025-qb} \TG{don't forget to anonymize all the references coming from the lab} shows that numerical uncertainty in
 ANTs linear registration can induce artifacts comparable to physical head motion
 (0.2mm). Therefore, precision reduction must be managed carefully to preserve
 anatomical integrity. Similarly for DL models, if this noise exceeds the
 gradient signal, optimization can stall or diverge. Standard AMP in PyTorch
 primarily addresses underflow issues through loss scaling and manages dynamic
-range but does not dynamically assess whether the mantissa bits are sufficient
-to represent the update direction accurately. While existing tools like
+range but does not dynamically assess whether the mantissa provides sufficient precision
+to represent the update direction \TG{what does ``update direction'' mean? This sounds like chat-gpt wording}. While existing tools like
 Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} enable rigorous precision
 analysis, they incur prohibitive runtime overheads ($2.6\times$ to
 $16.8\times$)~\cite{Chatelain2019-vw}, making them unsuitable for real-time
@@ -114,14 +114,20 @@ In this work, we introduce DynoMP, a dynamic mixed precision method that adjusts
 \subsection{Minimum Precision Estimation}
 Hayford et al.~\cite{Hayford2024-kb} proposed a theoretical framework linking
 convergence stability of gradient-based optimization with its data precision $p$, parameters $\theta$,
-and gradient loss $\nabla\mathcal{L}$, assuming that $\mathcal{L}$ is convex and $\nabla \mathcal{L}$ is Lipschitz continuous with constant $K$ such that $K < 1/\eta$. We adapt their Theorem~1 to estimate
+and gradient loss $\nabla\mathcal{L}$, assuming that $\mathcal{L}$ is convex and $\nabla \mathcal{L}$ is Lipschitz continuous with constant $K$ such that $K < 1/\eta$. \TG{Define $\eta$} We adapt their Theorem~1 to estimate
 the minimum precision ($p_{min}$) required to ensure the gradient signal exceeds
 the noise inherent to a given data format:
 \begin{equation}
 	p > p_{min} = \log_2 \left( \frac{(4+3\sqrt{2}) K \|\theta\|}{\|\nabla\mathcal{L}(\theta)\|} \right) .
 	\label{eq:pmin}
 \end{equation}
-Intuitively, insufficient precision allows quantization noise to dominate the gradient signal, causing optimization to stall or diverge. Equation~\ref{eq:pmin} formalizes this trade-off: highly curved loss landscapes ($K$) or large parameter magnitudes ($\|\theta\|$) amplify noise, requiring higher precision. Conversely, a strong gradient signal ($\|\nabla\mathcal{L}(\theta)\|$) reduces the precision needed for stable updates.
+Intuitively, insufficient precision allows quantization noise to dominate the
+gradient signal, causing optimization to stall or diverge.
+Equation~\ref{eq:pmin} formalizes this trade-off: highly curved \TG{``highly curved'' is not a mathematical notion, can you find a better word?} loss landscapes
+($K$) or large parameter magnitudes ($\|\theta\|$) amplify noise, requiring
+higher precision. Conversely, a strong gradient signal
+($\|\nabla\mathcal{L}(\theta)\|$) reduces the precision needed for stable
+updates.
 
 In practice, computing the Lipschitz constant $K$ is non-trivial, so we empirically estimate it using a finite difference approach:
 \begin{equation}
@@ -154,7 +160,7 @@ ITK~\cite{McCormick2014-ok, Yoo2002-ve}), which performs sequential rigid,
 affine, and Symmetric Normalization (SyN) stages across four multi-resolution
 levels. The optimization minimizes Mutual Information (MI) for linear stages and
 Cross-Correlation (CC) for the deformable SyN stage, iterating until convergence
-($10^{-6}$) or a maximum iteration count is reached.
+($10^{-6}$\TG{add two words to explain what this is}) or a maximum iteration count is reached.
 
 We used the \textit{BMB\_1} site ($N=50$) from the CoRR
 dataset~\cite{Zuo2014-ub}. We processed the anatomical T1-weighted volumes,
@@ -266,7 +272,19 @@ of the training. If FP24 hardware were available, it could be leveraged for a
 majority (64\%) of the training. As with the ANTs registration, we observe a
 general increase in required precision across iterations.
 
-For both VoxelMorph 2D and 3D models, FP24 precision is required for the majority of batches, with FP16 sufficing for fewer than 10 initial batches. Consequently, due to the absence of native FP24 hardware support on H100 GPUs, FP32 was utilized for execution. Attempts to train using BF16 and standard Automatic Mixed Precision (AMP) strategies resulted in optimization divergence during the early stages of training. Furthermore, results for FP16 are omitted, as vanishing gradients prevented the reliable estimation of $p_{min}$. Consistent with prior observations, the required precision generally increases across iterations, eventually plateauing after approximately 2,000 batches. Ultimately, these findings demonstrate that while BF16 is insufficient for VoxelMorph training, FP24 provides adequate numerical stability, thereby underscoring the potential utility of FP24 hardware support for such applications.
+For both VoxelMorph 2D and 3D models, FP24 precision is required for the
+majority of batches, with FP16 sufficing for fewer than 10 initial batches.
+Consequently, due to the absence of native FP24 hardware support on H100 GPUs,
+FP32 was utilized for execution \TG{which execution exactly?}. Attempts to train using BF16 and standard
+Automatic Mixed Precision (AMP) strategies resulted in optimization divergence
+during the early stages of training \TG{Figure 4 is not referred in the text (it should be)}. Furthermore, results for FP16 are omitted,
+as vanishing gradients prevented the reliable estimation of $p_{min}$.
+Consistent with prior observations, the required precision generally increases
+across iterations, eventually plateauing after approximately 2,000 batches.
+Ultimately, these findings demonstrate that while BF16 is insufficient for
+VoxelMorph training, FP24 provides adequate numerical stability, thereby
+underscoring the potential utility of FP24 hardware support for such
+applications.
 \begin{figure*}[b!]
 	\centering
 	\begin{subfigure}{0.32\textwidth}
