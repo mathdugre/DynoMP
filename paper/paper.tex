@@ -79,11 +79,11 @@
 	maintaining the accuracy of the baseline method. This dynamic approach
 	offers a promising pathway for achieving resource-efficient and
 	high-performance medical image computing.
-																																																																																																				
+																																																																																																							
 	Code is available at \url{https://anonymous.4open.science/r/DynoMP-83F2}.
-																																																																																																				
+																																																																																																							
 	\keywords{Mixed Precision \and Image Registration \and Deep Learning.}
-																																																																																																			
+																																																																																																						
 \end{abstract}
 %
 %
@@ -95,14 +95,14 @@ Mixed precision computing addresses this by strategically combining high- and lo
 
 Applying reduced precision requires caution. For example, registration is an
 ill-posed optimization problem where errors can amplify across multi-resolution
-stages. Recent work~\cite{Mirhakimi2025-qb} \TG{don't forget to anonymize all the references coming from the lab} shows that numerical uncertainty in
+stages. Recent work~\cite{Mirhakimi2025-qb} shows that numerical uncertainty in
 ANTs linear registration can induce artifacts comparable to physical head motion
 (0.2mm). Therefore, precision reduction must be managed carefully to preserve
 anatomical integrity. Similarly for DL models, if this noise exceeds the
 gradient signal, optimization can stall or diverge. Standard AMP in PyTorch
 primarily addresses underflow issues through loss scaling and manages dynamic
 range but does not dynamically assess whether the mantissa provides sufficient precision
-to represent the update direction \TG{what does ``update direction'' mean? This sounds like chat-gpt wording}. While existing tools like
+to represent the gradient update. While existing tools like
 Verificarlo~\cite{Denis2015-zf,Chatelain2019-vw} enable rigorous precision
 analysis, they incur prohibitive runtime overheads ($2.6\times$ to
 $16.8\times$)~\cite{Chatelain2019-vw}, making them unsuitable for real-time
@@ -114,7 +114,7 @@ In this work, we introduce DynoMP, a dynamic mixed precision method that adjusts
 \subsection{Minimum Precision Estimation}
 Hayford et al.~\cite{Hayford2024-kb} proposed a theoretical framework linking
 convergence stability of gradient-based optimization with its data precision $p$, parameters $\theta$,
-and gradient loss $\nabla\mathcal{L}$, assuming that $\mathcal{L}$ is convex and $\nabla \mathcal{L}$ is Lipschitz continuous with constant $K$ such that $K < 1/\eta$. \TG{Define $\eta$} We adapt their Theorem~1 to estimate
+and gradient loss $\nabla\mathcal{L}$, assuming that $\mathcal{L}$ is convex and $\nabla \mathcal{L}$ is Lipschitz continuous with constant $K$ such that $K < 1/\eta$, where $\eta$ is the learning rate. We adapt their Theorem~1 to estimate
 the minimum precision ($p_{min}$) required to ensure the gradient signal exceeds
 the noise inherent to a given data format:
 \begin{equation}
@@ -123,8 +123,7 @@ the noise inherent to a given data format:
 \end{equation}
 Intuitively, insufficient precision allows quantization noise to dominate the
 gradient signal, causing optimization to stall or diverge.
-Equation~\ref{eq:pmin} formalizes this trade-off: highly curved \TG{``highly curved'' is not a mathematical notion, can you find a better word?} loss landscapes
-($K$) or large parameter magnitudes ($\|\theta\|$) amplify noise, requiring
+Equation~\ref{eq:pmin} formalizes this trade-off: loss with sharp curvature ($K$) or large parameter magnitudes ($\|\theta\|$) amplify noise, requiring
 higher precision. Conversely, a strong gradient signal
 ($\|\nabla\mathcal{L}(\theta)\|$) reduces the precision needed for stable
 updates.
@@ -159,8 +158,8 @@ We used the standard ANTs registration~\cite{Avants2008-ea} pipeline (based on
 ITK~\cite{McCormick2014-ok, Yoo2002-ve}), which performs sequential rigid,
 affine, and Symmetric Normalization (SyN) stages across four multi-resolution
 levels. The optimization minimizes Mutual Information (MI) for linear stages and
-Cross-Correlation (CC) for the deformable SyN stage, iterating until convergence
-($10^{-6}$\TG{add two words to explain what this is}) or a maximum iteration count is reached.
+Cross-Correlation (CC) for the deformable SyN stage, iterating until reaching the convergence threshold
+($10^{-6}$) or the maximum iteration count.
 
 We used the \textit{BMB\_1} site ($N=50$) from the CoRR
 dataset~\cite{Zuo2014-ub}. We processed the anatomical T1-weighted volumes,
@@ -270,14 +269,13 @@ for the PyTorch models. For MNIST, our model estimates a $p_{min}$ of FP16 for
 the early iterations, but it quickly increases to FP32 and remains for the rest
 of the training. If FP24 hardware were available, it could be leveraged for a
 majority (64\%) of the training. As with the ANTs registration, we observe a
-general increase in required precision across iterations.
-
-For both VoxelMorph 2D and 3D models, FP24 precision is required for the
+general increase in required precision across iterations. For both VoxelMorph 2D and 3D models, FP24 precision is required for the
 majority of batches, with FP16 sufficing for fewer than 10 initial batches.
 Consequently, due to the absence of native FP24 hardware support on H100 GPUs,
-FP32 was utilized for execution \TG{which execution exactly?}. Attempts to train using BF16 and standard
-Automatic Mixed Precision (AMP) strategies resulted in optimization divergence
-during the early stages of training \TG{Figure 4 is not referred in the text (it should be)}. Furthermore, results for FP16 are omitted,
+FP32 was utilized for arithmetic operations. 
+
+Attempts to train using BF16 and standard Automatic Mixed Precision (AMP) strategies resulted in optimization divergence
+during the early stages of training (see Figure~\ref{fig:pytorch-loss}). Furthermore, results for FP16 are omitted,
 as vanishing gradients prevented the reliable estimation of $p_{min}$.
 Consistent with prior observations, the required precision generally increases
 across iterations, eventually plateauing after approximately 2,000 batches.
@@ -307,7 +305,7 @@ applications.
 	\caption{Estimated $p_{min}$ across batches for the PyTorch models. The horizontal dashed lines indicate the precision thresholds for BF16, FP16, FP24, and FP32; the color of the data points indicates the data format used at runtime; note that FP24 is not available on H100 GPUs.}
 	\label{fig:pytorch-pmin}
 \end{figure*}
-\begin{figure*}[b!]
+\begin{figure*}[t!]
 	\centering
 	\begin{subfigure}{0.32\textwidth}
 		\includegraphics[width=\textwidth]{figures/mnist_loss.pdf}
@@ -329,6 +327,7 @@ applications.
 	\caption{Loss curves across training batches for the PyTorch models. The color of the data points indicates the data format used at runtime. We evaluate the following strategy: FP32 (baseline), FP16, BF16, PyTorch's AMP, and our proposed DynoMP method.}
 	\label{fig:pytorch-loss}
 \end{figure*}
+
 
 \section{Discussion and Conclusion}
 % \subsection{The Need for Intermediate Precision}
